@@ -1,0 +1,425 @@
+package zombiegame;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class Game {
+
+	//global variables
+	int panW = 800;
+	int panH = 600;
+	JFrame window;
+	GamePanel panel;
+
+	//instance variables
+	Player player = new Player(20,20,panW/2-10,panH/2-10,0,0);
+	ArrayList<Zombie> zombieList = new ArrayList<>();
+	ArrayList<Bullet> bulletList = new ArrayList<>();
+	boolean playerAlive = true;
+	int mx;
+	int my;
+	int clickX;
+	int clickY;
+	
+
+	public static void main (String[] args) {
+
+		new Game();
+
+	}
+
+	Game() {
+
+		window = new JFrame("Zombie Game");
+		panel = new GamePanel();
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.add(panel);
+
+		spawnZombies();
+		
+				Thread gfxThread = new Thread() {
+		
+					public void run() {
+		
+						while(playerAlive) {
+							try {
+								Thread.sleep(8);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							panel.repaint();
+						}
+					}
+		
+				};
+		
+				Thread logicThread = new Thread() {
+		
+					public void run() {
+		
+						while (playerAlive) {
+							try {
+								Thread.sleep(8);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+		
+							movePlayer();
+							//moveZombies();
+							shootBullets();
+							gameStatus();
+		
+						}
+					}
+				};
+		
+		
+				gfxThread.start();
+				logicThread.start();
+
+		window.pack();
+		window.setLocationRelativeTo(null);
+		window.setVisible(true);
+
+	}
+
+	void spawnZombies() {
+		
+		for (int i = 0; i < 3; i++) {
+			
+			Zombie z = new Zombie (20,20,(int)(Math.random()*panW),(int)(Math.random()*panH),0,0);
+			
+			while (z.posX >= player.playerPosX - 20 && z.posX <= player.playerPosX + 20) {
+				z.posX = (int)(Math.random()*panW);
+			}
+			while (z.posY >= player.playerPosY - 20 && z.posY <= player.playerPosY + 20) {
+				z.posY = (int)(Math.random()*panH);
+			}
+			
+			zombieList.add(z);
+			
+		}
+		
+	}
+	
+	void movePlayer() {
+		player.playerPosX += player.playerSpeedX;
+		player.playerPosY += player.playerSpeedY;
+	}
+	
+	void moveZombies() {
+		
+		for (Zombie z : zombieList) {
+			
+			if (player.playerPosX > z.posX) {
+				z.speedX = 1;
+			}
+			else {
+				z.speedX = -1;
+			}
+			
+			if (player.playerPosY > z.posY) {
+				z.speedY = 1;
+			}
+			else {
+				z.speedY = -1;
+			}
+			
+			z.posX += z.speedX;
+			z.posY += z.speedY;
+			
+		}
+		
+		
+	}
+	
+	void shootBullets() {
+		
+		for (Bullet b : bulletList) {
+			
+			b.posX += b.speedX;
+			b.posY += b.speedY;
+		
+			for (int i = 0; i < zombieList.size(); i++) {
+				
+				if (b.posX >= zombieList.get(i).posX && b.posX <= zombieList.get(i).posX + 20) {
+					
+					if (b.posY >= zombieList.get(i).posY && b.posY <= zombieList.get(i).posY + 20) {
+						
+						zombieList.remove(i);
+						i--;
+						//bulletList.remove(b);
+						
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+	}
+	
+	void gameStatus() {
+		
+		for (Zombie z : zombieList) {
+			
+			if (z.posX == player.playerPosX && z.posY == player.playerPosY) {
+				window.setTitle("Game over");
+				playerAlive = false;
+			}
+			
+		}
+		
+		
+	}
+
+	class GamePanel extends JPanel {
+
+		GamePanel() {
+
+			this.setBackground(Color.black);
+			this.setPreferredSize(new Dimension(panW,panH));
+
+			this.addMouseListener(new MouseAL());
+			this.addMouseMotionListener(new MouseMotionAL());
+			this.addKeyListener(new WAL());
+			this.addKeyListener(new AAL());
+			this.addKeyListener(new SAL());
+			this.addKeyListener(new DAL());
+			this.setFocusable(true);
+			this.requestFocusInWindow();
+
+		}
+
+		public void paintComponent(Graphics g) {
+
+			super.paintComponent(g);
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
+			
+			g2.setColor(Color.white);
+			g2.fillRect(player.playerPosX,player.playerPosY,player.playerWidth,player.playerHeight);
+			
+			g2.setColor(Color.red);
+			
+			for (Zombie z : zombieList) {
+				g2.fillRect(z.posX, z.posY, z.width, z.height);
+			}
+			
+			g2.setColor(Color.white);
+			for (Bullet b : bulletList) {
+				g2.fill(new Rectangle2D.Double(b.posX, b.posY, b.width, b.height));
+			}
+			
+			g2.setColor(new Color(255,255,255,80));
+			g2.drawLine(player.playerPosX + (player.playerWidth/2), player.playerPosY + (player.playerHeight/2), mx,my);
+		}
+
+	}
+
+
+	
+	
+	
+	
+	
+	class MouseAL implements MouseListener {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+			clickX = e.getX();
+			clickY = e.getY();
+			
+			double deltaX = Math.abs(clickX - (player.playerPosX + (player.playerWidth/2)));
+			double deltaY = Math.abs(clickY - player.playerPosY + (player.playerHeight/2));
+			double slope = deltaY/deltaX;
+			double angle = Math.atan(slope);
+			System.out.println(Math.toDegrees(angle));
+			Bullet b = new Bullet(6,6,player.playerPosX + (player.playerWidth/2),player.playerPosY+ (player.playerWidth/2),0,0);
+			
+			
+			if (clickX > player.playerPosX) b.speedX = (4*Math.cos(angle));
+			if (clickX < player.playerPosX) b.speedX = (-4*Math.cos(angle));
+			if (clickY > player.playerPosY) b.speedY = (4*Math.sin(angle));
+			if (clickY < player.playerPosY) b.speedY = (-4*Math.sin(angle));
+			
+			bulletList.add(b);
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			
+		}
+		
+	}
+	
+	
+	
+	class WAL implements KeyListener { 
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+
+			int key = e.getKeyCode();
+			
+			if (key == 87) {
+				player.playerSpeedY = -2;
+			}
+			
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+
+			int key = e.getKeyCode();
+			
+			if (key == 87) {
+				player.playerSpeedY = 0;
+			}
+
+		}
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+	}
+	
+	class AAL implements KeyListener { 
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+
+			int key = e.getKeyCode();
+			
+			if (key == 65) {
+				player.playerSpeedX =-2;
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+
+			int key = e.getKeyCode();
+			
+			if (key == 65) {
+				player.playerSpeedX = 0;
+			}
+
+		}
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+	}
+	
+	class SAL implements KeyListener { 
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+
+			int key = e.getKeyCode();
+
+			if (key == 83) {
+				player.playerSpeedY = 2;
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+
+			int key = e.getKeyCode();
+
+			if (key == 83) {
+				player.playerSpeedY = 0;
+			}
+			
+		}
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+	}
+	
+	class DAL implements KeyListener { 
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+
+			int key = e.getKeyCode();
+
+			if (key == 68) {
+				player.playerSpeedX = 2;
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+
+			int key = e.getKeyCode();
+
+			if (key == 68) {
+				player.playerSpeedX = 0;
+			}
+		}
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+	}
+
+	class MouseMotionAL implements MouseMotionListener {
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			
+			mx = e.getX();
+			my = e.getY();
+			
+		}
+		
+	}
+
+}
