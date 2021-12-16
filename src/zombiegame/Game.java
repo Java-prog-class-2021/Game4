@@ -21,7 +21,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -46,7 +45,6 @@ public class Game {
 	Player player = new Player(panW/2-10,panH/2-10,0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
-	Rectangle border = new Rectangle(-1000+(panW/2),-1000+(panH/2),2000,2000);
 	boolean playerAlive = true;
 	boolean leftMove = false;
 	boolean rightMove = false;
@@ -188,23 +186,6 @@ public class Game {
 			b.posY -= player.playerSpeedY;
 
 		}
-		
-		if (player.playerPosX <= border.x) {
-			player.playerSpeedX = 0;
-		}
-		if (player.playerPosX + player.playerWidth >= border.x + border.width) {
-			player.playerSpeedX = 0;
-
-		}
-		if (player.playerPosY <= border.y) {
-			player.playerSpeedY = 0;
-		}
-		if (player.playerPosY + player.playerHeight >= border.y + border.height) {
-			player.playerSpeedY = 0;
-		}
-		
-		border.x -= player.playerSpeedX;
-		border.y -= player.playerSpeedY;
 	}
 
 	void moveZombies() {
@@ -315,6 +296,7 @@ public class Game {
 	
 	void checkHealth() {
 		
+		int i = 0;
 		for (Zombie z : zombieList) {
 			
 			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
@@ -361,13 +343,6 @@ public class Game {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
 
-			//draw border
-			g2.setColor(Color.white);
-			g2.setStroke(new BasicStroke(8));
-			g2.drawRect(border.x, border.y, border.width, border.height);
-			
-			
-			g2.setStroke(new BasicStroke(1));
 			//draw bullets
 			g2.setColor(new Color(0,0,0,20));
 			for (Bullet b : bulletList) {
@@ -531,6 +506,8 @@ public class Game {
                 player.playerSpeedX = 0;
             }
 
+            
+            
         }
 		@Override
 		public void keyTyped(KeyEvent e) {

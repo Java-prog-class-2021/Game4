@@ -17,6 +17,7 @@ public class Zombie {
 		this.posY = posY;
 		this.speedX = speedX;
 		this.speedY = speedY;
+		
 	}
 	
 }
