@@ -2,7 +2,7 @@ package zombiegame;
 
 public class Bullet {
 
-	int width = 8;
+	int width = 7; //was 8
 	double height = 8;
 	double posX = 8;
 	double posY;
