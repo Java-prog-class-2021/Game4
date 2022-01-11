@@ -1,2 +1,4 @@
 # Game4
-Josh, Henry, Hermela, Widaad   
+Widaad   
+
+Current Responsibilities:
