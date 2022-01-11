@@ -8,6 +8,7 @@ public class Bullet {
 	double posY;
 	double speedX;
 	double speedY;
+	double damage = 20;
 	
 	Bullet(double posX, double posY, double speedX, double speedY) {
 		
