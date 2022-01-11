@@ -10,13 +10,11 @@ public class Zombie {
 	double speedY;
 	double angle;
 	double damage = 8;
+	double fullHealth = 50;
+	double health = fullHealth;
 	
-	Zombie(double posX, double posY, double speedX, double speedY) {
+	Zombie() {
 		
-		this.posX = posX;
-		this.posY = posY;
-		this.speedX = speedX;
-		this.speedY = speedY;
 	}
 	
 }
