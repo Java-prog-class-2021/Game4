@@ -27,7 +27,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -46,23 +45,26 @@ public class Game {
 	Player player = new Player(panW/2-10,panH/2-10,0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
-	Rectangle border = new Rectangle(-1000+(panW/2),-1000+(panH/2),2000,2000);
+	ArrayList<Building> buildingList = new ArrayList<>();
+	Border border = new Border();
 	boolean playerAlive = true;
-	boolean leftMove = false;
-	boolean rightMove = false;
-	boolean upMove = false;
-	boolean downMove = false;
-	int mx;
-	int my;
+
+	boolean leftPressed = false;
+	boolean rightPressed = false;
+	boolean upPressed = false;
+	boolean downPressed = false;
+
 	int playerScore = 0;
 	int round = 0;
 	int SLEEP = 8;
+	double zfh = 50;
+
+	int GRID = (int)(border.width/60);
+	int board[][] = new int [GRID][GRID];
 
 
 	public static void main (String[] args) {
-
 		new Game();
-
 	}
 
 	Game() {
@@ -72,7 +74,7 @@ public class Game {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.add(panel);
 
-		spawnZombies();
+		//setup();
 
 		Thread gfxThread = new Thread() {
 
@@ -112,36 +114,68 @@ public class Game {
 				}
 			}
 		};
-		
+
+
 		Thread healthThread = new Thread() {
-			
+
 			public void run() {
-				
+
 				while (true) {
-					
+
 					try {
 						Thread.sleep(SLEEP);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
+
 					checkHealth();
-					
+
 				}
-				
+
 			}
-			
+
 		};
 
-
+		setup();
 		gfxThread.start();
 		logicThread.start();
 		healthThread.start();
 
+
+
 		window.pack();
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
+
+	}
+
+	void setup() {
+
+		//set ground tiles
+
+		for (int i = 0; i < GRID; i++) {
+
+			for (int j = 0; j < GRID; j++) {
+
+				board[i][j] = 1;
+
+			}
+
+		}
+
+		spawnZombies();
+
+
+
+		//create buildings
+
+		//x pos, y pos, width, height, colour
+		Building shack = new Building(20, 20, 200, 140, Color.decode("#452522"));
+		buildingList.add(shack);
+		
+		Building warehouse = new Building(1000, 10, 400, 700, Color.gray);
+		buildingList.add(warehouse);
 
 	}
 
@@ -151,29 +185,199 @@ public class Game {
 			round++;
 			for (int i = 0; i < 2*(round) + 6; i++) {
 
-				Zombie z = new Zombie ((int)(Math.random()*panW),(int)(Math.random()*panH),0,0);
+				Zombie z = new Zombie ();
 
-				while (z.posX >= player.playerPosX - 250 && z.posX <= player.playerPosX + 200) {
-					z.posX = (int)(Math.random()*panW);
-				}
-				while (z.posY >= player.playerPosY - 250 && z.posY <= player.playerPosY + 200) {
-					z.posY = (int)(Math.random()*panH);
+				z.fullHealth += 10;
+
+				//spawn within borders
+				z.posX = (int)(Math.random()*border.width)+border.x;
+				z.posY = (int)(Math.random()*border.height)+border.y;
+
+
+				//make sure zombies spawn off screen
+				if (z.posX + z.width >= 0 && z.posX < panW && z.posY + z.height >= 0 && z.posY < panH) { //if zombie is within screen dimensions
+
+
+					//50% chance of changing the x position, 50% chance of changing the y position
+					if ((int)(Math.random()*2) == 1) {
+
+						//change x
+
+						while (z.posX + z.width >= 0 && z.posX < panW) {
+
+							z.posX = (int)(Math.random()*border.width)+border.x;
+
+						}
+
+					}
+					else {
+
+						//change y
+
+						while (z.posY + z.height >= 0 && z.posY < panH) {
+
+							z.posY = (int)(Math.random()*border.height)+border.y;
+
+						}
+
+					}
+
+
 				}
 
 				zombieList.add(z);
 
 
 			}
+
+
 		}
 
 
 	}
 
 	void movePlayer() {
-		//		player.playerPosX += player.playerSpeedX;
-		//		player.playerPosY += player.playerSpeedY;
+
 
 		//TODO: make more efficient, maybe with separate panels?
+
+		//movement speed
+
+		player.playerSpeedX = 0;
+		player.playerSpeedY = 0;
+
+		if (upPressed) {
+			player.playerSpeedY = -2;
+		}
+
+		if (downPressed) {
+			player.playerSpeedY = 2;
+		}
+
+		if (rightPressed) {
+			player.playerSpeedX = 2;
+		}
+
+		if (leftPressed) {
+			player.playerSpeedX = -2;
+		}
+
+		if (upPressed && rightPressed) {
+			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
+			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
+
+			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
+		}
+
+		if (upPressed && leftPressed) {
+			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
+			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
+
+			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
+		}
+
+		if (downPressed && rightPressed) {
+			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
+			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
+			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
+		}
+
+		if (downPressed && leftPressed) {
+			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
+			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
+
+			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
+		}
+
+		if (downPressed && upPressed) {
+			player.playerSpeedY = 0;
+		}
+
+		if (leftPressed && rightPressed) {
+			player.playerSpeedX = 0;
+		}
+
+
+
+		//COLLISION
+
+
+		//against border
+		if (player.playerPosX <= border.x && leftPressed) { //left of border
+			player.playerSpeedX = 0;
+		}
+		if (player.playerPosX + player.playerWidth >= border.x + border.width && rightPressed) { //right of border
+			player.playerSpeedX = 0;
+		}
+		if (player.playerPosY <= border.y && upPressed) { //top of border
+			player.playerSpeedY = 0;
+		}
+		if (player.playerPosY + player.playerHeight >= border.y + border.height && downPressed) { //bottom of border
+			player.playerSpeedY = 0;
+		}
+
+		//against buildings
+		for (Building b : buildingList) {
+
+
+			//bottom of building
+			if (upPressed) {
+				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
+
+					if (player.playerPosY <= b.y + b.height + 1 && player.playerPosY >= b.y + b.height -1) {
+
+						player.playerSpeedY = 0;
+
+					}
+
+				}
+			}
+
+			//top of building
+			if (downPressed) {
+				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
+
+					if (player.playerPosY + player.playerHeight <= b.y + 1 && player.playerPosY + player.playerHeight >= b.y-1) {
+
+						player.playerSpeedY = 0;
+
+					}
+
+				}
+			}
+
+
+			//left of building
+			if (rightPressed) {
+				if (player.playerPosY <= b.y+b.height&& player.playerPosY+player.playerHeight >= b.y) {
+
+					if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x-1) {
+
+						player.playerSpeedX = 0;
+
+					}
+
+				}
+			}
+
+			//right of building
+			if (leftPressed) {
+				if (player.playerPosY <= b.y+b.height&& player.playerPosY+player.playerHeight >= b.y) {
+
+					if (player.playerPosX <= b.x + b.width +  1 && player.playerPosX>= b.x + b.width-1) {
+
+						player.playerSpeedX = 0;
+
+					}
+
+				}
+			}
+
+		}
+
+
+
+		//update the positions of all the surroundings
 
 		for (Zombie z : zombieList) {
 
@@ -188,23 +392,26 @@ public class Game {
 			b.posY -= player.playerSpeedY;
 
 		}
-		
-		if (player.playerPosX <= border.x) {
-			player.playerSpeedX = 0;
-		}
-		if (player.playerPosX + player.playerWidth >= border.x + border.width) {
-			player.playerSpeedX = 0;
+
+		for (Building b : buildingList) {
+
+			b.x -= player.playerSpeedX;
+			b.y -= player.playerSpeedY;
 
 		}
-		if (player.playerPosY <= border.y) {
-			player.playerSpeedY = 0;
-		}
-		if (player.playerPosY + player.playerHeight >= border.y + border.height) {
-			player.playerSpeedY = 0;
-		}
-		
+
+
 		border.x -= player.playerSpeedX;
 		border.y -= player.playerSpeedY;
+
+
+		//		System.out.println("X: " + player.playerSpeedX);
+		//		System.out.println("Y: " + player.playerSpeedY);
+		//		System.out.println(" ");
+
+		//		System.out.println(player.playerSpeedX);
+		//		System.out.println(player.playerSpeedY);
+		//		System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY * player.playerSpeedY));
 	}
 
 	void moveZombies() {
@@ -236,11 +443,6 @@ public class Game {
 					z.speedY = -0.5*Math.cos(z.angle);
 				}
 			}
-			
-			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
-				z.speedX = 0;
-				z.speedY = 0;
-			}
 
 
 			z.posX += z.speedX;
@@ -253,43 +455,56 @@ public class Game {
 
 	void shootBullets() {
 
-		int j = 0;
-		for (int k = 0; k < bulletList.size(); k++) {
+		for (int i = 0; i < bulletList.size(); i++) {
 
-			bulletList.get(k).posX += bulletList.get(k).speedX;
-			bulletList.get(k).posY += bulletList.get(k).speedY;
 
-			for (int i = 0; i < zombieList.size(); i++) {
+			for (int j = 0; j < zombieList.size(); j++) {
 
-				if (bulletList.get(k).posX >= zombieList.get(i).posX && bulletList.get(k).posX <= zombieList.get(i).posX + 20) {
+				//if bullet goes off screen
+				if (bulletList.get(i).posX < 0 || bulletList.get(i).posX >= panW || bulletList.get(i).posY < 0 || bulletList.get(i).posY >= panH) {
+					bulletList.remove(i);
+					return;
+				}
 
-					if (bulletList.get(k).posY >= zombieList.get(i).posY && bulletList.get(k).posY <= zombieList.get(i).posY + 20) {
 
-						zombieList.remove(i);
-						playerScore+=10;
-						i--;
-						//bulletList.remove(0);
+				//if bullet hits a zombie
+				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).width) {
+
+					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).height) {
+
+						zombieList.get(j).health -= bulletList.get(i).damage;
+						bulletList.remove(i);
+
+
+						if (zombieList.get(j).health <= 0) {
+							zombieList.remove(j);
+							playerScore+=10;
+						}
+
+						return;
+
 
 					}
+
 
 				}
 
 			}
 
-			j++;
-		}
 
+			bulletList.get(i).posX += bulletList.get(i).speedX;
+			bulletList.get(i).posY += bulletList.get(i).speedY;
+
+		}
 
 	}
 
 	void gameStatus() {
 
-		for (Zombie z : zombieList) {
-
-			if (player.health <= 0) {
-				window.setTitle("Game over");
-				playerAlive = false;
-			}
+		if (player.health <= 0) {
+			window.setTitle("Game over");
+			playerAlive = false;
+			player.health = 0; //so that player health doesn't display as negative
 
 		}
 
@@ -297,9 +512,9 @@ public class Game {
 	}
 
 	void createBullets(int x, int y) {
-		
-		double deltaX = Math.abs((player.playerPosX + (player.playerWidth/2)-4)-mx);
-		double deltaY = Math.abs((player.playerPosY + (player.playerHeight/2)-4)-my);
+
+		double deltaX = Math.abs((player.playerPosX + (player.playerWidth/2)-4)-x);
+		double deltaY = Math.abs((player.playerPosY + (player.playerHeight/2)-4)-y);
 		double angle = Math.atan2(deltaY, deltaX);
 		Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
 
@@ -310,45 +525,42 @@ public class Game {
 		if (y < player.playerPosY) b.speedY = (double)(-5*Math.sin(angle));
 
 		bulletList.add(b);	
-		
+
 	}
-	
+
 	void checkHealth() {
-		
-		for (Zombie z : zombieList) {
-			
-			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
+
+		for (int i = 0; i < zombieList.size(); i++) {
+
+			if (zombieList.get(i).posX >= player.playerPosX-1 && zombieList.get(i).posX <= player.playerPosX+player.playerWidth +1 && zombieList.get(i).posY >= player.playerPosY-1 && zombieList.get(i).posY <= player.playerPosY + player.playerHeight+1) {
+				player.health -= zombieList.get(i).damage;
 				try {
 					Thread.sleep(SLEEP*200);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				player.health -= z.damage;
-				
-				//so that health doesn't display as negative
-				if (player.health < 0) {
-					player.health = 0;
-				}
-				
-				
-			}
-			
-		}
-		
 
-		
+
+
+
+
+			}
+
+		}
+
+
+
 	}
-	
+
 	class GamePanel extends JPanel {
 
 		GamePanel() {
 
-			this.setBackground(Color.decode("#809B63"));
+			this.setBackground(Color.decode("#66c1d1"));
 			this.setPreferredSize(new Dimension(panW,panH));
 
 			this.addMouseListener(new MouseAL());
-			this.addMouseMotionListener(new MouseMotionAL());
 			this.addKeyListener(new WAL());
 			this.setFocusable(true);
 			this.requestFocusInWindow();
@@ -361,12 +573,48 @@ public class Game {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
 
+			//colour tiles
+
+			for (int i = 0; i < GRID; i++) {
+
+				for (int j = 0; j < GRID; j++) {
+
+					if (board[i][j]==1) {
+
+						g2.setColor(Color.decode("#809B63"));
+						g2.fillRect((int)border.x+(i*60), (int)border.y+(j*60), 60, 60);
+
+					}
+
+				}
+
+			}
+
+
+			//draw grid
+
+			g2.setColor(Color.black);
+			for (int i = (int)border.x; i < border.x + border.width; i+=60) {
+
+				g2.drawLine(i, (int)border.y, i, (int)(border.y + border.height));
+
+			}
+			for (int i = (int)border.y; i < border.y + border.height; i+=60) {
+
+				g2.drawLine((int)border.x, i, (int)(border.x + border.width), i);
+
+			}
+
 			//draw border
 			g2.setColor(Color.white);
 			g2.setStroke(new BasicStroke(8));
-			g2.drawRect(border.x, border.y, border.width, border.height);
+			g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
+
+
 			
 			
+			
+
 			g2.setStroke(new BasicStroke(1));
 			//draw bullets
 			g2.setColor(new Color(0,0,0,20));
@@ -377,7 +625,7 @@ public class Game {
 			for (Bullet b : bulletList) {
 				g2.fill(new Ellipse2D.Double(b.posX, b.posY, b.width, b.height));
 			}
-			
+
 			//draw player
 			g2.setColor(new Color(0,0,0,20));
 			g2.fill(new Ellipse2D.Double(player.playerPosX+5,player.playerPosY+5,player.playerWidth,player.playerHeight)); //player shadow
@@ -393,14 +641,37 @@ public class Game {
 			for (Zombie z : zombieList) {
 				g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
 			}
+			
+			//draw buildings
 
+			for (Building b : buildingList) {
+
+				g2.setColor(new Color(0,0,0,40));
+
+				g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
+
+			}
+			
+			for (Building b : buildingList) {
+
+				g2.setColor(b.colour);
+
+				g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
+
+			}
+
+			//draw zombie health bars
+			g2.setColor(Color.white);
+			for (Zombie z : zombieList) {
+				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-15, z.posY - 12, (int)(30*(z.health/z.fullHealth)),5));
+			}
 
 			//score and round displays
 			g2.setFont(new Font("Helvetica", Font.BOLD, 24));
 			g2.setColor(Color.white);
 			g2.drawString("Score: " + playerScore, panW-180, panH-30);
 			g2.drawString("Round: " + round, 30, panH-30);
-			
+
 			//health display
 			g2.setColor(Color.red);
 			g2.drawString("❤", 20,30); //this will probably get replaced by a sprite
@@ -408,7 +679,7 @@ public class Game {
 			g2.setColor(Color.white);
 			g2.setFont(new Font("Helvetica", Font.BOLD, 20));
 			g2.drawString(""+(int)player.health, 162, 29);
-			
+
 			if (!playerAlive) {
 				g2.setColor(new Color(200,0,0,100));
 				g2.fillRect(0,0,panW,panH);
@@ -424,11 +695,6 @@ public class Game {
 	}
 
 
-
-
-
-
-
 	class MouseAL implements MouseListener {
 
 		@Override
@@ -437,9 +703,9 @@ public class Game {
 
 			int clickX = e.getX();
 			int clickY = e.getY();
-			
+
 			createBullets(clickX, clickY);
-		
+
 		}
 
 		@Override
@@ -461,103 +727,54 @@ public class Game {
 
 	class WAL implements KeyListener { 
 
+
+
 		@Override
 		public void keyPressed(KeyEvent e) {
 
 			int key = e.getKeyCode();
 
 			if (key == 87) {
-				upMove = true;
-				player.playerSpeedY = -2;
+				upPressed = true;
 			}
 			if (key == 65) {
-				leftMove = true;
-				player.playerSpeedX = -2;
+				leftPressed = true;
 			}
 			if (key == 83) {
-				downMove = true;
-				player.playerSpeedY = 2;
+				downPressed = true;
 			}
 			if (key == 68) {
-				rightMove = true;
-				player.playerSpeedX = 2;
+				rightPressed = true;
 			}
-			if (rightMove && downMove && key!=65 && key!=87) {
-				player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
-				player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
-			}
-			if (leftMove && downMove && key!=87 && key!=68) {
-				player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
-				player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
-			}
-			if (leftMove && upMove && key!=68 && key!=83) {
-				player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
-				player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
-			}
-			if (rightMove && upMove && key!=83 && key!=65) {
-				player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
-				player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
-			}
-
-
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
 
-            int key = e.getKeyCode();
+			int key = e.getKeyCode();
 
-            if (key == 87) {
-                upMove = false;
-                player.playerSpeedY = 2;
-            }
-            if (key == 65) {
-                leftMove = false;
-                player.playerSpeedX = 2;
-            }
-            if (key == 83) {
-                downMove = false;
-                player.playerSpeedY = -2;
-            }
-            if (key == 68) {
-                rightMove = false;
-                player.playerSpeedX = -2;
-            }
+			if (key == 87) {
+				upPressed = false;
+			}
+			if (key == 65) {
+				leftPressed = false;
+			}
+			if (key == 83) {
+				downPressed = false;
+			}
+			if (key == 68) {
+				rightPressed = false;
+			}
 
-            if (!upMove && !downMove) {
-                player.playerSpeedY = 0;
-            }
-            if (!leftMove && !rightMove) {
-                player.playerSpeedX = 0;
-            }
 
-        }
+		}
 		@Override
 		public void keyTyped(KeyEvent e) {
 			// TODO Auto-generated method stub
 
 		}
 
-
-
-
-
 	}
 
-	class MouseMotionAL implements MouseMotionListener {
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-
-			mx = e.getX();
-			my = e.getY();
-
-		}
-
-	}
 
 }
