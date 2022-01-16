@@ -49,8 +49,10 @@ public class Game {
 	Border border = new Border();
 	boolean playerAlive = true;
 
-	boolean[] keys = {false,false,false,false};
-	static final int UP=0, DOWN=1, LEFT=2, RIGHT=3; 
+	boolean leftPressed = false;
+	boolean rightPressed = false;
+	boolean upPressed = false;
+	boolean downPressed = false;
 
 	int playerScore = 0;
 	int round = 0;
@@ -72,17 +74,81 @@ public class Game {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.add(panel);
 
+		//setup();
+
+		Thread gfxThread = new Thread() {
+
+			public void run() {
+
+				while(true) {
+					try {
+						Thread.sleep(SLEEP);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					panel.repaint();
+				}
+			}
+
+		};
+
+		Thread logicThread = new Thread() {
+
+			public void run() {
+
+				while (true) {
+					try {
+						Thread.sleep(SLEEP);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					movePlayer();
+					moveZombies();
+					shootBullets();
+					spawnZombies();
+					gameStatus();
+
+				}
+			}
+		};
+
+
+		Thread healthThread = new Thread() {
+
+			public void run() {
+
+				while (true) {
+
+					try {
+						Thread.sleep(SLEEP);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					checkHealth();
+
+				}
+
+			}
+
+		};
+
 		setup();
-		new GfxThread().start();
-		new LogicThread().start();
-		new HealthThread().start();
+		gfxThread.start();
+		logicThread.start();
+		healthThread.start();
+
+
 
 		window.pack();
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
 
 	}
-
 
 	void setup() {
 
@@ -107,7 +173,7 @@ public class Game {
 		//x pos, y pos, width, height, colour
 		Building shack = new Building(20, 20, 200, 140, Color.decode("#452522"));
 		buildingList.add(shack);
-
+		
 		Building warehouse = new Building(1000, 10, 400, 700, Color.gray);
 		buildingList.add(warehouse);
 
@@ -180,59 +246,73 @@ public class Game {
 		player.playerSpeedX = 0;
 		player.playerSpeedY = 0;
 
-		if (keys[UP])		player.playerSpeedY = -2;
-		if (keys[DOWN])		player.playerSpeedY =  2;		
-		if (keys[RIGHT]) 	player.playerSpeedX =  2;
-		if (keys[LEFT])		player.playerSpeedX = -2;		
+		if (upPressed) {
+			player.playerSpeedY = -2;
+		}
 
-		if (keys[UP] && keys[RIGHT]) {
+		if (downPressed) {
+			player.playerSpeedY = 2;
+		}
+
+		if (rightPressed) {
+			player.playerSpeedX = 2;
+		}
+
+		if (leftPressed) {
+			player.playerSpeedX = -2;
+		}
+
+		if (upPressed && rightPressed) {
 			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
 
 			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
-		if (keys[UP] && keys[LEFT]) {
+		if (upPressed && leftPressed) {
 			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
 
 			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
-		if (keys[DOWN] && keys[RIGHT]) {
+		if (downPressed && rightPressed) {
 			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
 			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
-		if (keys[DOWN] && keys[LEFT]) {
+		if (downPressed && leftPressed) {
 			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
 
 			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
-		if (keys[DOWN] && keys[UP]) {
+		if (downPressed && upPressed) {
 			player.playerSpeedY = 0;
 		}
 
-		if (keys[LEFT] && keys[RIGHT]) {
+		if (leftPressed && rightPressed) {
 			player.playerSpeedX = 0;
 		}
+
 
 
 		//COLLISION
+
+
 		//against border
-		if (player.playerPosX <= border.x && keys[LEFT]) { //left of border
+		if (player.playerPosX <= border.x && leftPressed) { //left of border
 			player.playerSpeedX = 0;
 		}
-		if (player.playerPosX + player.playerWidth >= border.x + border.width && keys[RIGHT]) { //right of border
+		if (player.playerPosX + player.playerWidth >= border.x + border.width && rightPressed) { //right of border
 			player.playerSpeedX = 0;
 		}
-		if (player.playerPosY <= border.y && keys[UP]) { //top of border
+		if (player.playerPosY <= border.y && upPressed) { //top of border
 			player.playerSpeedY = 0;
 		}
-		if (player.playerPosY + player.playerHeight >= border.y + border.height && keys[DOWN]) { //bottom of border
+		if (player.playerPosY + player.playerHeight >= border.y + border.height && downPressed) { //bottom of border
 			player.playerSpeedY = 0;
 		}
 
@@ -241,7 +321,7 @@ public class Game {
 
 
 			//bottom of building
-			if (keys[UP]) {
+			if (upPressed) {
 				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
 
 					if (player.playerPosY <= b.y + b.height + 1 && player.playerPosY >= b.y + b.height -1) {
@@ -254,7 +334,7 @@ public class Game {
 			}
 
 			//top of building
-			if (keys[DOWN]) {
+			if (downPressed) {
 				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
 
 					if (player.playerPosY + player.playerHeight <= b.y + 1 && player.playerPosY + player.playerHeight >= b.y-1) {
@@ -268,7 +348,7 @@ public class Game {
 
 
 			//left of building
-			if (keys[RIGHT]) {
+			if (rightPressed) {
 				if (player.playerPosY <= b.y+b.height&& player.playerPosY+player.playerHeight >= b.y) {
 
 					if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x-1) {
@@ -281,7 +361,7 @@ public class Game {
 			}
 
 			//right of building
-			if (keys[LEFT]) {
+			if (leftPressed) {
 				if (player.playerPosY <= b.y+b.height&& player.playerPosY+player.playerHeight >= b.y) {
 
 					if (player.playerPosX <= b.x + b.width +  1 && player.playerPosX>= b.x + b.width-1) {
@@ -448,20 +528,29 @@ public class Game {
 
 	}
 
-	//FIXME: add a comment to explain what this does. or change method name
-	//It actually sees if a zombie is hitting you.
 	void checkHealth() {
 
 		for (int i = 0; i < zombieList.size(); i++) {
 
 			if (zombieList.get(i).posX >= player.playerPosX-1 && zombieList.get(i).posX <= player.playerPosX+player.playerWidth +1 && zombieList.get(i).posY >= player.playerPosY-1 && zombieList.get(i).posY <= player.playerPosY + player.playerHeight+1) {
 				player.health -= zombieList.get(i).damage;
-				//FIXME: why is there a sleep here?
 				try {
 					Thread.sleep(SLEEP*200);
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+
+
+
+
 			}
+
 		}
+
+
+
 	}
 
 	class GamePanel extends JPanel {
@@ -501,19 +590,30 @@ public class Game {
 
 			}
 
+
 			//draw grid
+
 			g2.setColor(Color.black);
 			for (int i = (int)border.x; i < border.x + border.width; i+=60) {
+
 				g2.drawLine(i, (int)border.y, i, (int)(border.y + border.height));
+
 			}
 			for (int i = (int)border.y; i < border.y + border.height; i+=60) {
+
 				g2.drawLine((int)border.x, i, (int)(border.x + border.width), i);
+
 			}
 
 			//draw border
 			g2.setColor(Color.white);
 			g2.setStroke(new BasicStroke(8));
 			g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
+
+
+			
+			
+			
 
 			g2.setStroke(new BasicStroke(1));
 			//draw bullets
@@ -541,7 +641,7 @@ public class Game {
 			for (Zombie z : zombieList) {
 				g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
 			}
-
+			
 			//draw buildings
 
 			for (Building b : buildingList) {
@@ -551,7 +651,7 @@ public class Game {
 				g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
 
 			}
-
+			
 			for (Building b : buildingList) {
 
 				g2.setColor(b.colour);
@@ -594,9 +694,6 @@ public class Game {
 
 	}
 
-	/*****************************************************/
-	/*			Event Listener classes					 */
-	/*****************************************************/
 
 	class MouseAL implements MouseListener {
 
@@ -612,27 +709,43 @@ public class Game {
 		}
 
 		@Override
-		public void mousePressed(MouseEvent e) {}
+		public void mousePressed(MouseEvent e) {
+		}
 		@Override
-		public void mouseReleased(MouseEvent e) {}
+		public void mouseReleased(MouseEvent e) {
+		}
 		@Override
-		public void mouseEntered(MouseEvent e) {}
+		public void mouseEntered(MouseEvent e) {
+		}
 		@Override
-		public void mouseExited(MouseEvent e) {}
+		public void mouseExited(MouseEvent e) {
+		}
+
 	}
 
+
+
 	class WAL implements KeyListener { 
+
+
 
 		@Override
 		public void keyPressed(KeyEvent e) {
 
 			int key = e.getKeyCode();
 
-			if (key == 'W') keys[UP] = true;
-			if (key == 'A') keys[LEFT] = true;
-			if (key == 'S') keys[DOWN] = true; 
-			if (key == 'D') keys[RIGHT] = true; 
-			
+			if (key == 87) {
+				upPressed = true;
+			}
+			if (key == 65) {
+				leftPressed = true;
+			}
+			if (key == 83) {
+				downPressed = true;
+			}
+			if (key == 68) {
+				rightPressed = true;
+			}
 		}
 
 		@Override
@@ -640,54 +753,28 @@ public class Game {
 
 			int key = e.getKeyCode();
 
-			if (key == 'W') keys[UP] = false;
-			if (key == 'A') keys[LEFT] = false;
-			if (key == 'S') keys[DOWN] = false; 
-			if (key == 'D') keys[RIGHT] = false; 
-		}
+			if (key == 87) {
+				upPressed = false;
+			}
+			if (key == 65) {
+				leftPressed = false;
+			}
+			if (key == 83) {
+				downPressed = false;
+			}
+			if (key == 68) {
+				rightPressed = false;
+			}
 
+
+		}
 		@Override
-		public void keyTyped(KeyEvent e) {}
+		public void keyTyped(KeyEvent e) {
+			// TODO Auto-generated method stub
+
+		}
 
 	}
 
-	/*****************************************************/
-	/*				Thread classes						 */
-	/*****************************************************/
-	class LogicThread extends Thread {
-		public void run() {
-			while (true) {
-				try { Thread.sleep(SLEEP);
-				} catch (InterruptedException e) {}
-
-				movePlayer();
-				moveZombies();
-				shootBullets();
-				spawnZombies();
-				gameStatus();
-
-			}
-		}
-	};
-
-	class GfxThread extends Thread {
-		public void run() {
-			while(true) {
-				try { Thread.sleep(SLEEP);
-				} catch (InterruptedException e) {}
-
-				panel.repaint();
-			}
-		}
-	};
-
-	class HealthThread extends Thread {
-		public void run() {
-			while (true) {
-				try { Thread.sleep(SLEEP);
-				} catch (InterruptedException e) {}
-
-				checkHealth();
-			} } };
 
 }
