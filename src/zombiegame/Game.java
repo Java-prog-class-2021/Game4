@@ -49,8 +49,8 @@ public class Game {
 	Border border = new Border();
 	boolean playerAlive = true;
 	boolean roundOver = false;
-	
-		
+
+
 	boolean[] keys = {false,false,false,false};
 	static final int UP=0, DOWN=1, LEFT=2, RIGHT=3; 
 
@@ -120,16 +120,16 @@ public class Game {
 		if (zombieList.size() == 0) {
 			round++;
 			roundOver = true;
-			
-		if(round > 1 && roundOver == true) {
-			playerScore += 50;
-		}
+
+			if (round > 1 && roundOver == true) {
+				playerScore += 50;
+			}
 			for (int i = 0; i < 3*(round) + 6; i++) {
 
 				Zombie z = new Zombie ();
 
 				z.fullHealth += 10;
-				
+
 				//damage dealt by zombies increases per round
 				for (int j = 0; j < round-1; j++) {
 					if (round > 1 && roundOver == true) {
@@ -358,7 +358,7 @@ public class Game {
 			//initial speed of zombies
 			z.speedX = -0.5*Math.sin(z.angle);
 			z.speedY = -0.5*Math.cos(z.angle);
-		
+
 			//after round 1, movement speed of zombies increases per round
 			for (int i = 0; i < round; i++) {
 				if(round > 1 && roundOver) {
@@ -366,7 +366,7 @@ public class Game {
 					z.speedY += -0.25*Math.cos(z.angle);
 				}
 			}
-			
+
 			for (Zombie m : zombieList) {
 
 				if (zombieList.indexOf(z) != zombieList.indexOf(m)) {
@@ -385,9 +385,9 @@ public class Game {
 			}
 
 
-			
+
 			//pathfinding around buildings
-			
+
 			for (Building b : buildingList) {
 
 				//if zombie is to the right of building (within a 25 pixel margin)
@@ -401,7 +401,7 @@ public class Game {
 
 							if (player.playerPosY <= (b.height/2) + b.y) {
 								z.speedX = 0;
-								z.speedY = 0.5;
+								z.speedY = -	0.5;
 							}
 
 							if (player.playerPosY > (b.height/2) + b.y) {
@@ -524,7 +524,7 @@ public class Game {
 					bulletList.remove(i);
 					return;
 				}
-				
+
 				//if bullet hits a building
 				for (int x = 0; x < buildingList.size(); x++) {
 					if(bulletList.get(i).posX >= buildingList.get(x).x && bulletList.get(i).posX <= buildingList.get(x).x+buildingList.get(x).width) {
@@ -581,7 +581,7 @@ public class Game {
 
 
 
-		
+
 				}
 
 			}
@@ -754,7 +754,7 @@ public class Game {
 			g2.setColor(Color.white);
 			g2.setFont(new Font("Helvetica", Font.BOLD, 20));
 			g2.drawString(""+(int)player.health, 162, 29);
-			
+
 			g2.setColor(Color.red);
 			g2.drawLine(panW/2, 0, panW/2, panH);
 			g2.drawLine(0, panH/2, panW, panH/2);
@@ -811,7 +811,7 @@ public class Game {
 			if (key == 'A') keys[LEFT] = true;
 			if (key == 'S') keys[DOWN] = true; 
 			if (key == 'D') keys[RIGHT] = true; 
-			
+
 		}
 
 		@Override
@@ -841,7 +841,7 @@ public class Game {
 
 				movePlayer();
 				moveZombies();
-				shootBullets();
+				shootBullets();	
 				spawnZombies();
 				gameStatus();
 
