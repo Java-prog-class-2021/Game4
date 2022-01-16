@@ -447,7 +447,8 @@ public class Game {
 			}
 
 
-			for (Building b : buildingList) {
+			//zombie collision
+			/*for (Building b : buildingList) {
 				if (z.posX <= b.x+b.width && z.posX+ z.width >= b.x) { //bottom
 
 					if (z.posY <= b.y + b.height + 1 && z.posY >= b.y + b.height -1) {
@@ -482,16 +483,18 @@ public class Game {
 
 					}
 				}
+				*/
 
 
-
-			}
 			z.posX += z.speedX;
 			z.posY += z.speedY;
+			}
+			//z.posX += z.speedX;
+			//z.posY += z.speedY;
 
 		}
 
-	}
+	
 
 	void shootBullets() {
 
@@ -506,7 +509,18 @@ public class Game {
 					return;
 				}
 
+				//if bullet hits a building
+				for (int x = 0; x < buildingList.size(); x++) {
+					if(bulletList.get(i).posX >= buildingList.get(x).x && bulletList.get(i).posX <= buildingList.get(x).x+buildingList.get(x).width) {
 
+						if (bulletList.get(i).posY >= buildingList.get(x).y && bulletList.get(i).posY <= buildingList.get(x).y+buildingList.get(x).height) {
+							bulletList.remove(i);
+							return;
+
+
+						}
+					}
+				}
 				//if bullet hits a zombie
 				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).width) {
 
