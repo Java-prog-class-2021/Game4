@@ -173,7 +173,7 @@ public class Game {
 		//x pos, y pos, width, height, colour
 		Building shack = new Building(20, 20, 200, 140, Color.decode("#452522"));
 		buildingList.add(shack);
-		
+
 		Building warehouse = new Building(1000, 10, 400, 700, Color.gray);
 		buildingList.add(warehouse);
 
@@ -420,6 +420,8 @@ public class Game {
 		for (Zombie z : zombieList) {
 
 			z.angle = Math.atan2((z.posX - player.playerPosX), (z.posY - player.playerPosY));
+			//System.out.println(z.speedX);
+			//System.out.println(z.speedY);
 
 			for (int i = 0; i < zombieList.size(); i++) {
 				if(zombieList.indexOf(z) != i && z.posX > zombieList.get(i).posX - 30 && z.posX < zombieList.get(i).posX + 30) {
@@ -445,11 +447,49 @@ public class Game {
 			}
 
 
+			for (Building b : buildingList) {
+				if (z.posX <= b.x+b.width && z.posX+ z.width >= b.x) { //bottom
+
+					if (z.posY <= b.y + b.height + 1 && z.posY >= b.y + b.height -1) {
+						z.speedY = 0;
+
+					}
+				}
+
+				if (z.posX <= b.x+b.width && z.posX+z.width >= b.x) { //top
+
+					if (z.posY + z.height <= b.y + 1 && z.posY + z.height >= b.y-1) {
+
+						z.speedY = 0;
+
+					}
+				}
+				if (z.posY <= b.y+b.height&& z.posY+z.height >= b.y) { //left 
+
+					if (z.posX + z.width <= b.x + 1 && z.posX + z.width >= b.x-1) {
+
+
+						z.speedX = 0;
+
+					}
+				}
+				if (z.posY <= b.y+b.height&& z.posY+z.height >= b.y) { //right
+
+					if (z.posX <= b.x + b.width +  1 && z.posX>= b.x + b.width-1) {
+
+
+						z.speedX = 0;
+
+					}
+				}
+
+
+
+			}
 			z.posX += z.speedX;
 			z.posY += z.speedY;
 
 		}
-
 
 	}
 
@@ -611,9 +651,9 @@ public class Game {
 			g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
 
 
-			
-			
-			
+
+
+
 
 			g2.setStroke(new BasicStroke(1));
 			//draw bullets
@@ -641,7 +681,7 @@ public class Game {
 			for (Zombie z : zombieList) {
 				g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
 			}
-			
+
 			//draw buildings
 
 			for (Building b : buildingList) {
@@ -651,7 +691,7 @@ public class Game {
 				g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
 
 			}
-			
+
 			for (Building b : buildingList) {
 
 				g2.setColor(b.colour);
