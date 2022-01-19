@@ -401,7 +401,7 @@ public class Game {
 
 							if (player.playerPosY <= (b.height/2) + b.y) {
 								z.speedX = 0;
-								z.speedY = -	0.5;
+								z.speedY = 0.5;
 							}
 
 							if (player.playerPosY > (b.height/2) + b.y) {
@@ -841,7 +841,7 @@ public class Game {
 
 				movePlayer();
 				moveZombies();
-				shootBullets();	
+				shootBullets();
 				spawnZombies();
 				gameStatus();
 
