@@ -1,5 +1,3 @@
-/**
- *
  * Widaad
  * 
  * Hermela
@@ -126,8 +124,8 @@ public class Game {
 			}
 			for (int i = 0; i < 3*(round) + 6; i++) {
 
+				
 				Zombie z = new Zombie ();
-
 				z.fullHealth += 10;
 
 				//damage dealt by zombies increases per round
@@ -706,15 +704,18 @@ public class Game {
 			g2.fill(new Ellipse2D.Double(player.playerPosX+5,player.playerPosY+5,player.playerWidth,player.playerHeight)); //player shadow
 			g2.setColor(Color.white);
 			g2.fill(new Ellipse2D.Double(player.playerPosX,player.playerPosY,player.playerWidth,player.playerHeight)); //actual player
+			player.draw(g);
 
 			//draw zombies
 			g2.setColor(new Color(0,0,0,20));
 			for (Zombie z : zombieList) {
 				g2.fill(new Ellipse2D.Double(z.posX+5, z.posY+5, z.width, z.height)); //zombie shadows
+				
 			}
 			g2.setColor(Color.decode("#38350B"));
 			for (Zombie z : zombieList) {
 				g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
+				z.draw(g);
 			}
 
 			//draw buildings
