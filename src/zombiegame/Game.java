@@ -22,7 +22,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -47,13 +46,15 @@ public class Game {
 	GamePanel panel;
 
 	//instance variables
-	Player player = new Player(panW/2-(17),panH/2-(17),0,0);
+	Border border = new Border();
+	Player player = new Player(400-17,300-17,0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
 	ArrayList<Building> buildingList = new ArrayList<>();
-	Border border = new Border();
+
 	boolean playerAlive = true;
 	boolean roundOver = false;
+	boolean hitboxOn = false; //causes "hot code replace failed" to pop up, no idea what that means
 
 
 	boolean[] keys = {false,false,false,false};
@@ -64,7 +65,7 @@ public class Game {
 	int SLEEP = 8;
 	double zfh = 50;
 
-	int GRID = (int)(border.width/60);
+	int GRID = (int)(border.width/200);
 	int board[][] = new int [GRID][GRID];
 
 
@@ -74,7 +75,7 @@ public class Game {
 
 	Game() {
 
-		window = new JFrame("Martian Hunter");
+		window = new JFrame("Wastelander");
 		panel = new GamePanel();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.add(panel);
@@ -163,7 +164,7 @@ public class Game {
 						}
 					}
 				}
-				
+
 				zombieList.add(z);
 			}
 		}
@@ -317,7 +318,7 @@ public class Game {
 
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
-			
+
 			z.angle = Math.atan2((z.posX - player.playerPosX), (z.posY - player.playerPosY));
 
 			//initial speed of zombies
@@ -332,8 +333,8 @@ public class Game {
 				}
 			}
 
-			
-			
+
+
 			//pathfinding around buildings
 
 			for (Building b : buildingList) {
@@ -480,8 +481,8 @@ public class Game {
 
 			for (int j = 0; j < zombieList.size(); j++) {
 				Zombie z = zombieList.get(j);
-				
-				
+
+
 				//if bullet goes off screen
 				if (b.posX < 0 || b.posX >= panW || b.posY < 0 || b.posY >= panH) {
 					bulletList.remove(i);
@@ -653,30 +654,30 @@ public class Game {
 			for (int i = 0; i < GRID; i++) {
 
 				for (int j = 0; j < GRID; j++) {
-	
+
 					if (board[i][j]==1) {
-						g2.drawImage(imgTextureTile, (int)border.x+(i*(textureTileWidth-10)),(int)border.y+(j*(textureTileHeight-10)), textureTileWidth, textureTileHeight, null);
+						g2.drawImage(imgTextureTile, (int)border.x+(i*textureTileWidth),(int)border.y+(j*textureTileHeight), null);
 					}
 				}
 			}
 
-			
-			//draw grid
-			g2.setColor(Color.black);
-			for (int i = (int)border.x; i < border.x + border.width; i+=60) {
-				g2.drawLine(i, (int)border.y, i, (int)(border.y + border.height));
-			}
-			for (int i = (int)border.y; i < border.y + border.height; i+=60) {
-				g2.drawLine((int)border.x, i, (int)(border.x + border.width), i);
-			}
 
-			
+			//draw grid
+			//			g2.setColor(Color.black);
+			//			for (int i = (int)border.x; i < border.x + border.width; i+=60) {
+			//				g2.drawLine(i, (int)border.y, i, (int)(border.y + border.height));
+			//			}
+			//			for (int i = (int)border.y; i < border.y + border.height; i+=60) {
+			//				g2.drawLine((int)border.x, i, (int)(border.x + border.width), i);
+			//			}
+
+
 			//draw border
 			g2.setColor(Color.white);
 			g2.setStroke(new BasicStroke(8));
 			g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
 
-			
+
 			//draw bullets
 			g2.setStroke(new BasicStroke(1));
 			g2.setColor(Color.decode("#444444"));
@@ -687,7 +688,7 @@ public class Game {
 
 			//draw player
 			player.draw(g2);	
-			
+
 			//draw zombies
 			for (int i = 0; i < zombieList.size(); i++) {
 				Zombie z = zombieList.get(i);
@@ -716,7 +717,7 @@ public class Game {
 			g2.setColor(Color.white);
 			for (int i = 0; i < zombieList.size(); i++) {
 				Zombie z = zombieList.get(i);	
-				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-1.5, z.posY - 12, (int)(30*(z.health/z.fullHealth)),5));
+				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-(12), z.posY - 15, (int)(30*(z.health/z.fullHealth)),5));
 			}
 
 			//score and round displays
@@ -733,30 +734,29 @@ public class Game {
 			g2.setFont(new Font("Helvetica", Font.BOLD, 20));
 			g2.drawString(""+(int)player.health, 162, 29);
 
-			g2.setColor(Color.red);
-			g2.drawLine(panW/2, 0, panW/2, panH);
-			g2.drawLine(0, panH/2, panW, panH/2);
 
-			
-			
-			//draw player hitbox
-			g2.setStroke(new BasicStroke(4));
-			g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
-			g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
-			g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
-			g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+			if (hitboxOn) {
+				//crosshair
+				g2.setColor(Color.red);
+				g2.drawLine(panW/2, 0, panW/2, panH);
+				g2.drawLine(0, panH/2, panW, panH/2);
 
-			//draw zombie hitbox
-			for (Zombie z : zombieList) {
-				g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
-				g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
-				g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
-				g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
-				
+				//draw player hitbox
+				g2.setStroke(new BasicStroke(4));
+				g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
+				g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+				g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
+				g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+
+				//draw zombie hitbox
+				for (Zombie z : zombieList) {
+					g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
+					g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
+					g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
+					g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
+				}
 			}
-			
-			
-			
+
 			if (!playerAlive) {
 				g2.setColor(new Color(200,0,0,100));
 				g2.fillRect(0,0,panW,panH);
@@ -824,7 +824,21 @@ public class Game {
 		}
 
 		@Override
-		public void keyTyped(KeyEvent e) {}
+		public void keyTyped(KeyEvent e) {
+
+			//enable or disable hitboxes by pressing b
+			if (e.getKeyChar() == 'b') {
+
+				if (hitboxOn) {
+					hitboxOn = false;
+				}
+				else {
+					hitboxOn = true;
+				}
+
+			}
+
+		}
 
 	}
 
@@ -840,7 +854,7 @@ public class Game {
 				movePlayer();
 				moveZombies();
 				shootBullets();
-				spawnZombies();
+				//spawnZombies();
 				gameStatus();
 
 			}
