@@ -107,8 +107,6 @@ public class Game {
 
 		spawnZombies();
 
-
-
 		//create buildings
 
 		//x pos, y pos, width, height, colour
@@ -147,49 +145,31 @@ public class Game {
 				//make sure zombies spawn off screen
 				if (z.posX + z.width >= 0 && z.posX < panW && z.posY + z.height >= 0 && z.posY < panH) { //if zombie is within screen dimensions
 
-
 					//50% chance of changing the x position, 50% chance of changing the y position
 					if ((int)(Math.random()*2) == 1) {
 
 						//change x
 
 						while (z.posX + z.width >= 0 && z.posX < panW) {
-
 							z.posX = (int)(Math.random()*border.width)+border.x;
-
 						}
-
 					}
 					else {
 
 						//change y
 
 						while (z.posY + z.height >= 0 && z.posY < panH) {
-
 							z.posY = (int)(Math.random()*border.height)+border.y;
-
 						}
-
 					}
-
-
 				}
-
+				
 				zombieList.add(z);
-
-
 			}
-
-
 		}
-
-
 	}
 
 	void movePlayer() {
-
-
-		//TODO: make more efficient, maybe with separate panels?
 
 		//movement speed
 
@@ -204,28 +184,21 @@ public class Game {
 		if (keys[UP] && keys[RIGHT]) {
 			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
-
-			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
 		if (keys[UP] && keys[LEFT]) {
 			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
-
-			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
 		if (keys[DOWN] && keys[RIGHT]) {
 			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
-			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
 		if (keys[DOWN] && keys[LEFT]) {
 			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
 			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
-
-			//System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY*player.playerSpeedY));
 		}
 
 		if (keys[DOWN] && keys[UP]) {
@@ -315,46 +288,36 @@ public class Game {
 
 		//update the positions of all the surroundings
 
-		for (Zombie z : zombieList) {
-
+		for (int i = 0; i < zombieList.size(); i++) {
+			Zombie z = zombieList.get(i);
 			z.posX -= player.playerSpeedX;
 			z.posY -= player.playerSpeedY;
 
 		}
 
-		for (Bullet b : bulletList) {
-
+		for (int i = 0; i < bulletList.size(); i++) {
+			Bullet b = bulletList.get(i);
 			b.posX -= player.playerSpeedX;
 			b.posY -= player.playerSpeedY;
 
 		}
 
 		for (Building b : buildingList) {
-
 			b.x -= player.playerSpeedX;
 			b.y -= player.playerSpeedY;
-
 		}
-
 
 		border.x -= player.playerSpeedX;
 		border.y -= player.playerSpeedY;
 
-
-		//		System.out.println("X: " + player.playerSpeedX);
-		//		System.out.println("Y: " + player.playerSpeedY);
-		//		System.out.println(" ");
-
-		//		System.out.println(player.playerSpeedX);
-		//		System.out.println(player.playerSpeedY);
-		//		System.out.println(Math.sqrt(player.playerSpeedX*player.playerSpeedX + player.playerSpeedY * player.playerSpeedY));
 	}
 
 	void moveZombies() {
 
 
-		for (Zombie z : zombieList) {
-
+		for (int i = 0; i < zombieList.size(); i++) {
+			Zombie z = zombieList.get(i);
+			
 			z.angle = Math.atan2((z.posX - player.playerPosX), (z.posY - player.playerPosY));
 
 			//initial speed of zombies
@@ -362,32 +325,15 @@ public class Game {
 			z.speedY = -0.5*Math.cos(z.angle);
 
 			//after round 1, movement speed of zombies increases per round
-			for (int i = 0; i < round; i++) {
+			for (int j = 0; j < round; j++) {
 				if(round > 1 && roundOver) {
 					z.speedX += -0.25*Math.sin(z.angle);
 					z.speedY += -0.25*Math.cos(z.angle);
 				}
 			}
 
-			for (Zombie m : zombieList) {
-
-				if (zombieList.indexOf(z) != zombieList.indexOf(m)) {
-
-					if (z.posX + z.width >= m.posX && z.posX <= m.posX + m.width) {
-
-						if (z.posY + z.height >= m.posY && z.posY <= m.posY + m.height) {
-							//TODO: make zombies not overlap each other
-						}
-					}
-
-
-				}
-
-
-			}
-
-
-
+			
+			
 			//pathfinding around buildings
 
 			for (Building b : buildingList) {
@@ -517,9 +463,6 @@ public class Game {
 				}
 			}
 
-
-
-
 			z.posX += z.speedX;
 			z.posY += z.speedY;
 
@@ -533,21 +476,24 @@ public class Game {
 	void shootBullets() {
 
 		for (int i = 0; i < bulletList.size(); i++) {
-
+			Bullet b = bulletList.get(i);
 
 			for (int j = 0; j < zombieList.size(); j++) {
-
+				Zombie z = zombieList.get(j);
+				
+				
 				//if bullet goes off screen
-				if (bulletList.get(i).posX < 0 || bulletList.get(i).posX >= panW || bulletList.get(i).posY < 0 || bulletList.get(i).posY >= panH) {
+				if (b.posX < 0 || b.posX >= panW || b.posY < 0 || b.posY >= panH) {
 					bulletList.remove(i);
 					return;
 				}
 
 				//if bullet hits a building
-				for (int x = 0; x < buildingList.size(); x++) {
-					if(bulletList.get(i).posX >= buildingList.get(x).x && bulletList.get(i).posX <= buildingList.get(x).x+buildingList.get(x).width) {
+				for (int k = 0; k < buildingList.size(); k++) {
+					Building build = buildingList.get(k);
+					if(b.posX >= build.x && b.posX <= build.x+build.width) {
 
-						if (bulletList.get(i).posY >= buildingList.get(x).y && bulletList.get(i).posY <= buildingList.get(x).y+buildingList.get(x).height) {
+						if (b.posY >= build.y && b.posY <= build.y+build.height) {
 							bulletList.remove(i);
 							return;
 
@@ -559,19 +505,19 @@ public class Game {
 
 				//if bullet hits the border
 
-				if (bulletList.get(i).posX <= border.x) { //left side
+				if (b.posX <= border.x) { //left side
 					bulletList.remove(i);
 					return;
 				}
-				if (bulletList.get(i).posX + bulletList.get(i).width >= border.x + border.width) { //right side
+				if (b.posX + b.width >= border.x + border.width) { //right side
 					bulletList.remove(i);
 					return;
 				}
-				if (bulletList.get(i).posY <= border.y) { //top side
+				if (b.posY <= border.y) { //top side
 					bulletList.remove(i);
 					return;
 				}
-				if (bulletList.get(i).posY + bulletList.get(i).height >= border.y + border.height) { //bottom side
+				if (b.posY + b.height >= border.y + border.height) { //bottom side
 					bulletList.remove(i);
 					return;
 				}
@@ -579,16 +525,16 @@ public class Game {
 
 				//if bullet hits a zombie
 
-				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).width) {
+				if (b.posX >= z.posX && b.posX <= z.posX+z.width) {
 
-					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).height) {
+					if (b.posY >= z.posY && b.posY <= z.posY+z.height) {
 
-						zombieList.get(j).health -= bulletList.get(i).damage;
+						z.health -= b.damage;
 						bulletList.remove(i);
 
 
 						//each zombie that is killed scores 10 points
-						if (zombieList.get(j).health <= 0) {
+						if (z.health <= 0) {
 							zombieList.remove(j);
 							playerScore+=10;
 						}
@@ -606,8 +552,8 @@ public class Game {
 			}
 
 
-			bulletList.get(i).posX += bulletList.get(i).speedX;
-			bulletList.get(i).posY += bulletList.get(i).speedY;
+			b.posX += b.speedX;
+			b.posY += b.speedY;
 
 		}
 
@@ -647,9 +593,9 @@ public class Game {
 	void checkHealth() {
 
 		for (int i = 0; i < zombieList.size(); i++) {
-
-			if (zombieList.get(i).posX >= player.playerPosX-1 && zombieList.get(i).posX <= player.playerPosX+player.playerWidth +1 && zombieList.get(i).posY >= player.playerPosY-1 && zombieList.get(i).posY <= player.playerPosY + player.playerHeight+1) {
-				player.health -= zombieList.get(i).damage;
+			Zombie z = zombieList.get(i);
+			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
+				player.health -= z.damage;
 				//FIXME: why is there a sleep here?
 				try {
 					Thread.sleep(SLEEP*200);
@@ -658,6 +604,7 @@ public class Game {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	class GamePanel extends JPanel {
 
 		Image imgTextureTile;
@@ -703,22 +650,17 @@ public class Game {
 
 
 			//colour tiles
-
 			for (int i = 0; i < GRID; i++) {
 
 				for (int j = 0; j < GRID; j++) {
-
+	
 					if (board[i][j]==1) {
-
 						g2.drawImage(imgTextureTile, (int)border.x+(i*(textureTileWidth-10)),(int)border.y+(j*(textureTileHeight-10)), textureTileWidth, textureTileHeight, null);
-
-
 					}
-
 				}
-
 			}
 
+			
 			//draw grid
 			g2.setColor(Color.black);
 			for (int i = (int)border.x; i < border.x + border.width; i+=60) {
@@ -728,39 +670,27 @@ public class Game {
 				g2.drawLine((int)border.x, i, (int)(border.x + border.width), i);
 			}
 
+			
 			//draw border
 			g2.setColor(Color.white);
 			g2.setStroke(new BasicStroke(8));
 			g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
 
-			g2.setStroke(new BasicStroke(1));
+			
 			//draw bullets
-			g2.setColor(new Color(0,0,0,20));
-			for (Bullet b : bulletList) {
-				g2.fill(new Ellipse2D.Double(b.posX+2, b.posY+2, b.width, b.height));
-			}
+			g2.setStroke(new BasicStroke(1));
 			g2.setColor(Color.decode("#444444"));
-			for (Bullet b : bulletList) {
+			for (int i = 0; i < bulletList.size(); i++) {
+				Bullet b = bulletList.get(i);
 				g2.fill(new Ellipse2D.Double(b.posX, b.posY, b.width, b.height));
 			}
 
 			//draw player
-			//g2.setColor(new Color(0,0,0,150));
-			//g2.fill(new Ellipse2D.Double(player.playerPosX+5,player.playerPosY+5,player.playerWidth,player.playerHeight)); //player shadow
-			//g2.setColor(Color.white);
-			//g2.fill(new Ellipse2D.Double(player.playerPosX,player.playerPosY,player.playerWidth,player.playerHeight)); //actual player
-			player.draw(g);
-			
+			player.draw(g2);	
 			
 			//draw zombies
-			//g2.setColor(new Color(0,0,0,20));
-			for (Zombie z : zombieList) {
-				//g2.fill(new Ellipse2D.Double(z.posX+5, z.posY+5, z.width, z.height)); //zombie shadows
-
-			}
-			//g2.setColor(Color.decode("#38350B"));
-			for (Zombie z : zombieList) {
-				//g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
+			for (int i = 0; i < zombieList.size(); i++) {
+				Zombie z = zombieList.get(i);
 				z.draw(g2);
 			}
 
@@ -784,7 +714,8 @@ public class Game {
 
 			//draw zombie health bars
 			g2.setColor(Color.white);
-			for (Zombie z : zombieList) {
+			for (int i = 0; i < zombieList.size(); i++) {
+				Zombie z = zombieList.get(i);	
 				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-1.5, z.posY - 12, (int)(30*(z.health/z.fullHealth)),5));
 			}
 
