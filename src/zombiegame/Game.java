@@ -124,12 +124,9 @@ public class Game {
 			round++;
 			roundOver = true;
 
-			if (round > 1 && roundOver == true) {
-				playerScore += 50;
-			}
 			for (int i = 0; i < 3*(round) + 6; i++) {
 
-				
+
 				Zombie z = new Zombie ();
 				z.fullHealth += 10;
 
@@ -413,9 +410,12 @@ public class Game {
 
 							}
 
+							if (player.playerPosX >= b.x + b.width - 1 && player.playerPosX <= b.x + b.width + 25) {
+								z.speedX = -0.5*Math.sin(z.angle);
+								z.speedY = -0.5*Math.cos(z.angle);
+							}
 						}
 					}
-
 				}
 
 
@@ -439,9 +439,14 @@ public class Game {
 								z.speedY = 0.5;
 
 							}
+
+							if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x - 25) {
+								z.speedX = -0.5*Math.sin(z.angle);
+								z.speedY = -0.5*Math.cos(z.angle);
+
+							}
 						}
 					}
-
 				}
 
 				//if zombie is above building (within a 25 pixel margin)
@@ -465,9 +470,13 @@ public class Game {
 
 							}
 
+							if (player.playerPosY + player.playerHeight <= b.y +1 && player.playerPosY + player.playerHeight >= b.y - 25) {
+								z.speedX = -0.5*Math.sin(z.angle);
+								z.speedY = -0.5*Math.cos(z.angle);
+
+							}
 
 						}
-
 					}
 
 				}
@@ -494,7 +503,11 @@ public class Game {
 
 							}
 
+							if (player.playerPosY >= b.y + b.height -1 && player.playerPosY <= b.y + b.height + 25) {
+								z.speedX = -0.5*Math.sin(z.angle);
+								z.speedY = -0.5*Math.cos(z.angle);
 
+							}
 						}
 
 					}
@@ -563,7 +576,7 @@ public class Game {
 
 
 				//if bullet hits a zombie
-				
+
 				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).zombieW) {
 
 					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).zombieH) {
@@ -644,11 +657,11 @@ public class Game {
 	}
 
 	class GamePanel extends JPanel {
-		
+
 		Image imgTextureTile;
-		
+
 		GamePanel() {
-			
+
 			imgTextureTile = loadImage("texturetile1.jpg");
 			this.setBackground(Color.decode("#66c1d1"));
 			this.setPreferredSize(new Dimension(panW,panH));
@@ -659,7 +672,7 @@ public class Game {
 			this.requestFocusInWindow();
 
 		}
-		
+
 		Image loadImage(String filename) {
 			Image image = null;
 			URL imageURL = this.getClass().getResource("/" + filename);
@@ -673,19 +686,19 @@ public class Game {
 		}
 
 		public void paintComponent(Graphics g) {
-			
+
 			super.paintComponent(g);
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
-			
+
 			//draw ground tiles 
 			//	int treeTileWidth = imgTreeTile.getWidth(null);
 			//	int treeTileHeight = imgTreeTile.getWidth(null);
 			int textureTileWidth = imgTextureTile.getWidth(null);
 			int textureTileHeight = imgTextureTile.getHeight(null);
-			
+
 			if (imgTextureTile == null) return;
-			
+
 
 			//colour tiles
 
@@ -740,7 +753,7 @@ public class Game {
 			//g2.setColor(new Color(0,0,0,20));
 			for (Zombie z : zombieList) {
 				//g2.fill(new Ellipse2D.Double(z.posX+5, z.posY+5, z.width, z.height)); //zombie shadows
-				
+
 			}
 			//g2.setColor(Color.decode("#38350B"));
 			for (Zombie z : zombieList) {
