@@ -41,7 +41,7 @@ public class Zombie {
 	public void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		if (imgZombie == null) return;
-		g.drawImage(imgZombie, (int)posX, (int)posY, null);
+		g.drawImage(imgZombie, (int)posX-12, (int)posY-7, null);
 		
 	}
 }
