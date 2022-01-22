@@ -18,8 +18,6 @@ public class Player{
 	double playerSpeedX;
 	double playerSpeedY;
 	double health = 50;
-	int player1W;
-	int player1H;
 	
 	Image imgPlayer1;
 	
@@ -29,8 +27,6 @@ public class Player{
 		this.playerSpeedX = playerSpeedX;
 		this.playerSpeedY = playerSpeedY;
 		imgPlayer1 = loadImage("pisotalposeOG_forward.png");
-		player1W = imgPlayer1.getWidth(null);
-		player1H = imgPlayer1.getHeight(null);
 		
 	}
 	Image loadImage(String filename) {
@@ -50,6 +46,6 @@ public class Player{
 	public void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		if (imgPlayer1 == null) return;
-		g.drawImage(imgPlayer1, (int)playerPosX-12, (int)playerPosY-45, player1W, player1H, null);
+		g.drawImage(imgPlayer1, (int)playerPosX-12, (int)playerPosY-45, null);
 	}
 }
