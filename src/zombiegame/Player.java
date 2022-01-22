@@ -50,6 +50,6 @@ public class Player{
 	public void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		if (imgPlayer1 == null) return;
-		g.drawImage(imgPlayer1, (int)playerPosX, (int)playerPosY, player1W, player1H, null);
+		g.drawImage(imgPlayer1, (int)playerPosX-12, (int)playerPosY-45, player1W, player1H, null);
 	}
 }
