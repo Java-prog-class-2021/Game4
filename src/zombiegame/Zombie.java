@@ -44,5 +44,6 @@ public class Zombie {
 		Graphics2D g2 = (Graphics2D)g;
 		if (imgZombie == null) return;
 		g.drawImage(imgZombie, (int)posX, (int)posY, zombieW, zombieH, null);
+		
 	}
 }
