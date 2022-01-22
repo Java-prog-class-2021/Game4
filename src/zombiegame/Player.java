@@ -11,8 +11,8 @@ import java.awt.Image;
 import java.io.InputStream;
 public class Player{
 	
-	int playerWidth = 25;
-	int playerHeight = 25;
+	int playerWidth =34;
+	int playerHeight = 34;
 	double playerPosX;
 	double playerPosY;
 	double playerSpeedX;
@@ -46,6 +46,6 @@ public class Player{
 	public void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		if (imgPlayer1 == null) return;
-		g.drawImage(imgPlayer1, (int)playerPosX-12, (int)playerPosY-45, null);
+		g.drawImage(imgPlayer1, (int)playerPosX-8, (int)playerPosY-42, null);
 	}
 }
