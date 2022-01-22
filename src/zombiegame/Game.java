@@ -1,3 +1,5 @@
+/**
+ *
  * Widaad
  * 
  * Hermela
@@ -577,9 +579,9 @@ public class Game {
 
 				//if bullet hits a zombie
 
-				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).zombieW) {
+				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).width) {
 
-					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).zombieH) {
+					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).height) {
 
 						zombieList.get(j).health -= bulletList.get(i).damage;
 						bulletList.remove(i);
@@ -748,7 +750,8 @@ public class Game {
 			//g2.setColor(Color.white);
 			//g2.fill(new Ellipse2D.Double(player.playerPosX,player.playerPosY,player.playerWidth,player.playerHeight)); //actual player
 			player.draw(g);
-
+			
+			
 			//draw zombies
 			//g2.setColor(new Color(0,0,0,20));
 			for (Zombie z : zombieList) {
@@ -803,6 +806,26 @@ public class Game {
 			g2.drawLine(panW/2, 0, panW/2, panH);
 			g2.drawLine(0, panH/2, panW, panH/2);
 
+			
+			
+			//draw player hitbox
+			g2.setStroke(new BasicStroke(4));
+			g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
+			g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+			g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
+			g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+
+			//draw zombie hitbox
+			for (Zombie z : zombieList) {
+				g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
+				g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
+				g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
+				g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
+				
+			}
+			
+			
+			
 			if (!playerAlive) {
 				g2.setColor(new Color(200,0,0,100));
 				g2.fillRect(0,0,panW,panH);
