@@ -19,15 +19,13 @@ public class Zombie {
 	double damage = 8;
 	double fullHealth = 50;
 	double health = fullHealth;
-	int zombieW;
-	int zombieH;
+
 	
 	Image imgZombie;
 	
 	Zombie() {
 		imgZombie = loadImage("zombie1.png");
-		zombieW = imgZombie.getWidth(null);
-		zombieH = imgZombie.getWidth(null);
+
 	}
 	Image loadImage(String filename) {
 		Image image = null;
@@ -43,7 +41,7 @@ public class Zombie {
 	public void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		if (imgZombie == null) return;
-		g.drawImage(imgZombie, (int)posX, (int)posY, zombieW, zombieH, null);
+		g.drawImage(imgZombie, (int)posX, (int)posY, null);
 		
 	}
 }
