@@ -47,7 +47,7 @@ public class Game {
 	GamePanel panel;
 
 	//instance variables
-	Player player = new Player(panW/2-12.5,panH/2-11,0,0);
+	Player player = new Player(panW/2-(17),panH/2-(17),0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
 	ArrayList<Building> buildingList = new ArrayList<>();
