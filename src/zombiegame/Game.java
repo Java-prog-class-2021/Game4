@@ -19,6 +19,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
@@ -27,8 +28,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.net.URL;
 import java.util.ArrayList;
+
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Game {
@@ -558,15 +563,16 @@ public class Game {
 
 
 				//if bullet hits a zombie
-				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).width) {
+				
+				if (bulletList.get(i).posX >= zombieList.get(j).posX && bulletList.get(i).posX <= zombieList.get(j).posX+zombieList.get(j).zombieW) {
 
-					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).height) {
+					if (bulletList.get(i).posY >= zombieList.get(j).posY && bulletList.get(i).posY <= zombieList.get(j).posY+zombieList.get(j).zombieH) {
 
 						zombieList.get(j).health -= bulletList.get(i).damage;
 						bulletList.remove(i);
 
 
-						//each zombei that is killed scores 10 points
+						//each zombie that is killed scores 10 points
 						if (zombieList.get(j).health <= 0) {
 							zombieList.remove(j);
 							playerScore+=10;
@@ -638,9 +644,12 @@ public class Game {
 	}
 
 	class GamePanel extends JPanel {
-
+		
+		Image imgTextureTile;
+		
 		GamePanel() {
-
+			
+			imgTextureTile = loadImage("texturetile1.jpg");
 			this.setBackground(Color.decode("#66c1d1"));
 			this.setPreferredSize(new Dimension(panW,panH));
 
@@ -650,12 +659,33 @@ public class Game {
 			this.requestFocusInWindow();
 
 		}
+		
+		Image loadImage(String filename) {
+			Image image = null;
+			URL imageURL = this.getClass().getResource("/" + filename);
+			if (imageURL != null) {
+				ImageIcon icon = new ImageIcon(imageURL);
+				image = icon.getImage();
+			} else {
+				JOptionPane.showMessageDialog(null, "An image failed to load: " + filename , "ERROR", JOptionPane.ERROR_MESSAGE);
+			}
+			return image;
+		}
 
 		public void paintComponent(Graphics g) {
-
+			
 			super.paintComponent(g);
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
+			
+			//draw ground tiles 
+			//	int treeTileWidth = imgTreeTile.getWidth(null);
+			//	int treeTileHeight = imgTreeTile.getWidth(null);
+			int textureTileWidth = imgTextureTile.getWidth(null);
+			int textureTileHeight = imgTextureTile.getHeight(null);
+			
+			if (imgTextureTile == null) return;
+			
 
 			//colour tiles
 
@@ -665,8 +695,8 @@ public class Game {
 
 					if (board[i][j]==1) {
 
-						g2.setColor(Color.decode("#809B63"));
-						g2.fillRect((int)border.x+(i*60), (int)border.y+(j*60), 60, 60);
+						g2.drawImage(imgTextureTile, (int)border.x+(i*(textureTileWidth-10)),(int)border.y+(j*(textureTileHeight-10)), textureTileWidth, textureTileHeight, null);
+
 
 					}
 
@@ -700,22 +730,22 @@ public class Game {
 			}
 
 			//draw player
-			g2.setColor(new Color(0,0,0,150));
-			g2.fill(new Ellipse2D.Double(player.playerPosX+5,player.playerPosY+5,player.playerWidth,player.playerHeight)); //player shadow
-			g2.setColor(Color.white);
-			g2.fill(new Ellipse2D.Double(player.playerPosX,player.playerPosY,player.playerWidth,player.playerHeight)); //actual player
+			//g2.setColor(new Color(0,0,0,150));
+			//g2.fill(new Ellipse2D.Double(player.playerPosX+5,player.playerPosY+5,player.playerWidth,player.playerHeight)); //player shadow
+			//g2.setColor(Color.white);
+			//g2.fill(new Ellipse2D.Double(player.playerPosX,player.playerPosY,player.playerWidth,player.playerHeight)); //actual player
 			player.draw(g);
 
 			//draw zombies
-			g2.setColor(new Color(0,0,0,20));
+			//g2.setColor(new Color(0,0,0,20));
 			for (Zombie z : zombieList) {
-				g2.fill(new Ellipse2D.Double(z.posX+5, z.posY+5, z.width, z.height)); //zombie shadows
+				//g2.fill(new Ellipse2D.Double(z.posX+5, z.posY+5, z.width, z.height)); //zombie shadows
 				
 			}
-			g2.setColor(Color.decode("#38350B"));
+			//g2.setColor(Color.decode("#38350B"));
 			for (Zombie z : zombieList) {
-				g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
-				z.draw(g);
+				//g2.fill(new Ellipse2D.Double(z.posX, z.posY, z.width, z.height)); //actual zombies
+				z.draw(g2);
 			}
 
 			//draw buildings
@@ -739,7 +769,7 @@ public class Game {
 			//draw zombie health bars
 			g2.setColor(Color.white);
 			for (Zombie z : zombieList) {
-				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-15, z.posY - 12, (int)(30*(z.health/z.fullHealth)),5));
+				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-1.5, z.posY - 12, (int)(30*(z.health/z.fullHealth)),5));
 			}
 
 			//score and round displays
@@ -870,4 +900,4 @@ public class Game {
 				checkHealth();
 			} } };
 
-}
+}	
