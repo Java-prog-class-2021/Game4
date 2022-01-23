@@ -46,17 +46,19 @@ public class Game {
 	JFrame window;
 	GamePanel panel;
 
+	//status boolean
+	boolean programIsRunning = true;
+	boolean gameIsRunning = false;
+	boolean playerAlive = true;
+	boolean roundOver = false;
+	boolean hitboxOn = false; //causes "hot code replace failed" to pop up, no idea what that means
+
 	//instance variables
 	Border border = new Border();
 	Player player = new Player(400-17,300-17,0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
 	ArrayList<Building> buildingList = new ArrayList<>();
-
-	boolean playerAlive = true;
-	boolean roundOver = false;
-	boolean hitboxOn = false; //causes "hot code replace failed" to pop up, no idea what that means
-
 
 	boolean[] keys = {false,false,false,false};
 	static final int UP=0, DOWN=1, LEFT=2, RIGHT=3; 
@@ -69,6 +71,7 @@ public class Game {
 	int GRID = (int)(border.width/200);
 	int board[][] = new int [GRID][GRID];
 
+	int mouseX, mouseY, mouseClickX, mouseClickY;
 
 	public static void main (String[] args) {
 		new Game();
@@ -540,6 +543,8 @@ public class Game {
 
 	}
 
+
+
 	void shootBullets() {
 
 		for (int i = 0; i < bulletList.size(); i++) {
@@ -708,131 +713,145 @@ public class Game {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
 
-			//draw ground tiles 
-			//	int treeTileWidth = imgTreeTile.getWidth(null);
-			//	int treeTileHeight = imgTreeTile.getWidth(null);
-			int textureTileWidth = imgTextureTile.getWidth(null);
-			int textureTileHeight = imgTextureTile.getHeight(null);
 
-			if (imgTextureTile == null) return;
+			//menu
+			if (!gameIsRunning) {
+				g2.setColor(Color.black);
+				g2.fillRect(0, 0, panW, panH);
+				
+				g2.setColor(Color.white);
+				g2.setFont(new Font("Serif", Font.BOLD, 65));
+				g2.drawString("NUCLEAR WARZONE", 70, 150);
+
+				g2.setFont(new Font("Helvetica", Font.BOLD, 25));
+
+				//g2.drawRect(270, 220, 260, 40);
+				if (mouseX >= 270 && mouseX <= 270+260 && mouseY >= 220 && mouseY <= 220 + 40) {
+					g2.setColor(Color.yellow);
+				}
+				else {
+					g2.setColor(Color.white);
+				}
+
+				g2.drawString("Enter the WARZONE", 280, 250);
+
+			}
+
+			if (gameIsRunning) {
+				//draw ground tiles 
+				//	int treeTileWidth = imgTreeTile.getWidth(null);
+				//	int treeTileHeight = imgTreeTile.getWidth(null);
+				int textureTileWidth = imgTextureTile.getWidth(null);
+				int textureTileHeight = imgTextureTile.getHeight(null);
+
+				if (imgTextureTile == null) return;
 
 
-			//colour tiles
-			for (int i = 0; i < GRID; i++) {
+				//colour tiles
+				for (int i = 0; i < GRID; i++) {
 
-				for (int j = 0; j < GRID; j++) {
+					for (int j = 0; j < GRID; j++) {
 
-					if (board[i][j]==1) {
-						g2.drawImage(imgTextureTile, (int)border.x+(i*textureTileWidth),(int)border.y+(j*textureTileHeight), null);
+						if (board[i][j]==1) {
+							g2.drawImage(imgTextureTile, (int)border.x+(i*textureTileWidth),(int)border.y+(j*textureTileHeight), null);
+						}
 					}
 				}
-			}
+
+				//draw border
+				g2.setColor(Color.white);
+				g2.setStroke(new BasicStroke(8));
+				g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
 
 
-			//draw grid
-			//			g2.setColor(Color.black);
-			//			for (int i = (int)border.x; i < border.x + border.width; i+=60) {
-			//				g2.drawLine(i, (int)border.y, i, (int)(border.y + border.height));
-			//			}
-			//			for (int i = (int)border.y; i < border.y + border.height; i+=60) {
-			//				g2.drawLine((int)border.x, i, (int)(border.x + border.width), i);
-			//			}
+				//draw bullets
+				g2.setStroke(new BasicStroke(1));
+				g2.setColor(Color.decode("#444444"));
+				for (int i = 0; i < bulletList.size(); i++) {
+					Bullet b = bulletList.get(i);
+					g2.fill(new Ellipse2D.Double(b.posX, b.posY, b.width, b.height));
+				}
 
+				//draw player
+				player.draw(g2);	
 
-			//draw border
-			g2.setColor(Color.white);
-			g2.setStroke(new BasicStroke(8));
-			g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
+				//draw zombies
+				for (int i = 0; i < zombieList.size(); i++) {
+					Zombie z = zombieList.get(i);
+					z.draw(g2);
+				}
 
+				//draw buildings
 
-			//draw bullets
-			g2.setStroke(new BasicStroke(1));
-			g2.setColor(Color.decode("#444444"));
-			for (int i = 0; i < bulletList.size(); i++) {
-				Bullet b = bulletList.get(i);
-				g2.fill(new Ellipse2D.Double(b.posX, b.posY, b.width, b.height));
-			}
+				for (Building b : buildingList) {
 
-			//draw player
-			player.draw(g2);	
+					g2.setColor(new Color(0,0,0,40));
 
-			//draw zombies
-			for (int i = 0; i < zombieList.size(); i++) {
-				Zombie z = zombieList.get(i);
-				z.draw(g2);
-			}
+					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
 
-			//draw buildings
+				}
 
-			for (Building b : buildingList) {
+				for (Building b : buildingList) {
 
-				g2.setColor(new Color(0,0,0,40));
+					g2.setColor(b.colour);
 
-				g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
+					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
 
-			}
+				}
 
-			for (Building b : buildingList) {
+				//draw zombie health bars
+				g2.setColor(Color.white);
+				for (int i = 0; i < zombieList.size(); i++) {
+					Zombie z = zombieList.get(i);	
+					g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-(12), z.posY - 15, (int)(30*(z.health/z.fullHealth)),5));
+				}
 
-				g2.setColor(b.colour);
+				//score and round displays
+				g2.setFont(new Font("Helvetica", Font.BOLD, 24));
+				g2.setColor(Color.white);
+				g2.drawString("Score: " + playerScore, panW-180, panH-30);
+				g2.drawString("Round: " + round, 30, panH-30);
 
-				g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
-
-			}
-
-			//draw zombie health bars
-			g2.setColor(Color.white);
-			for (int i = 0; i < zombieList.size(); i++) {
-				Zombie z = zombieList.get(i);	
-				g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-(12), z.posY - 15, (int)(30*(z.health/z.fullHealth)),5));
-			}
-
-			//score and round displays
-			g2.setFont(new Font("Helvetica", Font.BOLD, 24));
-			g2.setColor(Color.white);
-			g2.drawString("Score: " + playerScore, panW-180, panH-30);
-			g2.drawString("Round: " + round, 30, panH-30);
-
-			//health display
-			g2.setColor(Color.red);
-			g2.drawString("❤", 20,30); //this will probably get replaced by a sprite
-			g2.fillRect(55, 15, (int)(100*(player.health/50)), 12);
-			g2.setColor(Color.white);
-			g2.setFont(new Font("Helvetica", Font.BOLD, 20));
-			g2.drawString(""+(int)player.health, 162, 29);
-
-
-			if (hitboxOn) {
-				//crosshair
+				//health display
 				g2.setColor(Color.red);
-				g2.drawLine(panW/2, 0, panW/2, panH);
-				g2.drawLine(0, panH/2, panW, panH/2);
+				//g2.drawString("❤", 20,30); //this will probably get replaced by a sprite
+				g2.fillRect(55, 15, (int)(100*(player.health/50)), 12);
+				g2.setColor(Color.white);
+				g2.setFont(new Font("Helvetica", Font.BOLD, 20));
+				g2.drawString(""+(int)player.health, 162, 29);
 
-				//draw player hitbox
-				g2.setStroke(new BasicStroke(4));
-				g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
-				g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
-				g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
-				g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
 
-				//draw zombie hitbox
-				for (Zombie z : zombieList) {
-					g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
-					g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
-					g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
-					g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
+				if (hitboxOn) {
+					//crosshair
+					g2.setColor(Color.red);
+					g2.drawLine(panW/2, 0, panW/2, panH);
+					g2.drawLine(0, panH/2, panW, panH/2);
+
+					//draw player hitbox
+					g2.setStroke(new BasicStroke(4));
+					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
+					g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
+					g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+
+					//draw zombie hitbox
+					for (Zombie z : zombieList) {
+						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
+						g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
+						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
+						g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
+					}
+				}
+
+				if (!playerAlive) {
+					g2.setColor(new Color(200,0,0,100));
+					g2.fillRect(0,0,panW,panH);
+					g2.setFont(new Font("Helvetica", Font.BOLD, 40));
+					g2.setColor(Color.white);
+					g2.drawString("GAME OVER", 280, panH/2 - 20);
+					SLEEP = 32;
 				}
 			}
-
-			if (!playerAlive) {
-				g2.setColor(new Color(200,0,0,100));
-				g2.fillRect(0,0,panW,panH);
-				g2.setFont(new Font("Helvetica", Font.BOLD, 40));
-				g2.setColor(Color.white);
-				g2.drawString("GAME OVER", 280, panH/2 - 20);
-				SLEEP = 32;
-			}
-
 
 		}
 
@@ -848,11 +867,17 @@ public class Game {
 		public void mouseClicked(MouseEvent e) {
 			// TODO Auto-generated method stub
 
-			int clickX = e.getX();
-			int clickY = e.getY();
+			mouseClickX = e.getX();
+			mouseClickY = e.getY();
 
-			createBullets(clickX, clickY);
-
+			if (gameIsRunning) {
+				createBullets(mouseClickX, mouseClickY);
+			}
+			else {
+				if (mouseClickX >= 270 && mouseClickX <= 270+260 && mouseClickY >= 220 && mouseClickY <= 220 + 40) {
+					gameIsRunning = true;
+				}
+			}
 		}
 
 		@Override
@@ -894,19 +919,20 @@ public class Game {
 		public void keyTyped(KeyEvent e) {
 
 			//enable or disable hitboxes by pressing b
-			if (e.getKeyChar() == 'b') {
+			if (gameIsRunning) {
+				if (e.getKeyChar() == 'b') {
 
-				if (hitboxOn) {
-					hitboxOn = false;
-				}
-				else {
-					hitboxOn = true;
+					if (hitboxOn) {
+						hitboxOn = false;
+					}
+					else {
+						hitboxOn = true;
+					}
+
 				}
 
 			}
-
 		}
-
 	}
 
 	class MotionAL implements MouseMotionListener {
@@ -920,43 +946,47 @@ public class Game {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 
-			double x = Math.abs(e.getX() - (panW/2));
-			double y = Math.abs(e.getY() - (panH/2));
-			
-			double angle = Math.atan((y/x));
+			mouseX = e.getX();
+			mouseY = e.getY();
 
-			System.out.println(x);
+			if (gameIsRunning) {
+				double x = Math.abs(mouseX - (panW/2));
+				double y = Math.abs(mouseY - (panH/2));
 
-			//cast rule
-			if (e.getX() > panW/2) {
+				double angle = Math.atan((y/x));
 
-				if (e.getY() > panH/2) {
-					//do nothing
+				System.out.println(x);
+
+				//cast rule
+				if (e.getX() > panW/2) {
+
+					if (e.getY() > panH/2) {
+						//do nothing
+					}
+
+					if (e.getY() < panH/2) {
+						angle = 2*Math.PI - angle;
+					}
+
+
+				}
+				if (e.getX() < panW/2) {
+
+					if (e.getY() > panH/2) {
+						angle = Math.PI - angle;
+					}
+
+					if (e.getY() < panH/2) {
+						angle = Math.PI + angle;
+					}
+
 				}
 
-				if (e.getY() < panH/2) {
-					angle = 2*Math.PI - angle;
-				}
+				angle += Math.PI/2;
 
+				player.rotation(angle);
 
 			}
-			if (e.getX() < panW/2) {
-
-				if (e.getY() > panH/2) {
-					angle = Math.PI - angle;
-				}
-
-				if (e.getY() < panH/2) {
-					angle = Math.PI + angle;
-				}
-
-			}
-
-			angle += Math.PI/2;
-			
-			player.rotation(angle);
-
-
 		}
 
 	}
@@ -970,11 +1000,13 @@ public class Game {
 				try { Thread.sleep(SLEEP);
 				} catch (InterruptedException e) {}
 
-				movePlayer();
-				moveZombies();
-				shootBullets();
-				spawnZombies();
-				gameStatus();
+				if (gameIsRunning) {
+					movePlayer();
+					moveZombies();
+					shootBullets();
+					spawnZombies();
+					gameStatus();
+				}
 
 			}
 		}
@@ -996,8 +1028,9 @@ public class Game {
 			while (true) {
 				try { Thread.sleep(SLEEP);
 				} catch (InterruptedException e) {}
-
-				checkHealth();
+				if (gameIsRunning) {
+					checkHealth();
+				}
 			} } };
 
 }	
