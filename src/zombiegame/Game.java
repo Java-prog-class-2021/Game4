@@ -27,6 +27,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.net.URL;
@@ -106,7 +107,7 @@ public class Game {
 
 		}
 
-		spawnZombies();
+		//spawnZombies();
 
 		//create buildings
 
@@ -618,6 +619,7 @@ public class Game {
 
 			this.addMouseListener(new MouseAL());
 			this.addKeyListener(new WAL());
+			this.addMouseMotionListener(new MotionAL());
 			this.setFocusable(true);
 			this.requestFocusInWindow();
 
@@ -842,6 +844,58 @@ public class Game {
 
 	}
 
+	class MotionAL implements MouseMotionListener {
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+
+			double x = Math.abs(e.getX() - (panW/2));
+			double y = Math.abs(e.getY() - (panH/2));
+			
+			double angle = Math.atan((y/x));
+
+			System.out.println(x);
+
+			//cast rule
+			if (e.getX() > panW/2) {
+
+				if (e.getY() > panH/2) {
+					//do nothing
+				}
+
+				if (e.getY() < panH/2) {
+					angle = 2*Math.PI - angle;
+				}
+
+
+			}
+			if (e.getX() < panW/2) {
+
+				if (e.getY() > panH/2) {
+					angle = Math.PI - angle;
+				}
+
+				if (e.getY() < panH/2) {
+					angle = Math.PI + angle;
+				}
+
+			}
+
+			angle += Math.PI/2;
+			
+			player.rotation(angle);
+
+
+		}
+
+	}
+
 	/*****************************************************/
 	/*				Thread classes						 */
 	/*****************************************************/
@@ -854,7 +908,7 @@ public class Game {
 				movePlayer();
 				moveZombies();
 				shootBullets();
-				//spawnZombies();
+				spawnZombies();
 				gameStatus();
 
 			}
