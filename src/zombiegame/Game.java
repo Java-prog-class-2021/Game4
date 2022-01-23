@@ -340,6 +340,7 @@ public class Game {
 
 			for (Building b : buildingList) {
 
+
 				//if zombie is to the right of building (within a 25 pixel margin)
 
 				if (z.posX >= b.x + b.width - 1 && z.posX <= b.x + b.width + 25) {
@@ -364,10 +365,26 @@ public class Game {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
+
+							for (int j = 0; j < round; j++) {
+								if (round > 1 && roundOver) {
+									if (player.playerPosY <= (b.height/2) + b.y) {
+										z.speedX = 0;
+										z.speedY += -0.2;
+									}
+									if (player.playerPosY > (b.height/2) + b.y) {
+										z.speedX = 0;
+										z.speedY += 0.2;
+									}
+									if (player.playerPosX >= b.x + b.width - 1 && player.playerPosX <= b.x + b.width + 25) {
+										z.speedX += -0.2*Math.sin(z.angle);
+										z.speedY += -0.2*Math.cos(z.angle);
+									}
+								}
+							}
 						}
 					}
 				}
-
 
 				//if zombie is to the left of building (within a 25 pixel margin)
 
@@ -394,6 +411,22 @@ public class Game {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 
+							}
+							for (int j = 0; j < round; j++) {
+								if (round > 1 && roundOver) {
+									if (player.playerPosY <= (b.height/2) + b.y) {
+										z.speedX = 0;
+										z.speedY += -0.2;
+									}
+									if (player.playerPosY > (b.height/2) + b.y) {
+										z.speedX = 0;
+										z.speedY += 0.2;
+									}
+									if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x - 25) {
+										z.speedX += -0.2*Math.sin(z.angle);
+										z.speedY += -0.2*Math.cos(z.angle);
+									}
+								}
 							}
 						}
 					}
@@ -425,13 +458,27 @@ public class Game {
 								z.speedY = -0.5*Math.cos(z.angle);
 
 							}
+							for (int j = 0; j < round; j++) {
+								if (round > 1 && roundOver) {
+									if (player.playerPosX <= (b.width/2) + b.x) {
+										z.speedX += -0.2;
+										z.speedY = 0;
+									}
+									if (player.playerPosX > (b.width/2) + b.x) {
+										z.speedX += 0.2;
+										z.speedY = 0;
+									}
+									if (player.playerPosY + player.playerHeight <= b.y +1 && player.playerPosY + player.playerHeight >= b.y - 25) {
+										z.speedX += -0.2*Math.sin(z.angle);
+										z.speedY += -0.2*Math.cos(z.angle);
+									}
+
+								}
+							}
 
 						}
 					}
-
 				}
-
-
 				//if zombie is below building (within a 25 pixel margin)
 
 				if (z.posY >= b.y + b.height -1 && z.posY <= b.y + b.height + 25) {
@@ -458,11 +505,29 @@ public class Game {
 								z.speedY = -0.5*Math.cos(z.angle);
 
 							}
+							for (int j = 0; j < round; j++) {
+								if (round > 1 && roundOver) {
+									if (player.playerPosX <= (b.width/2) + b.x) {
+										z.speedX += -0.2;
+										z.speedY = 0;
+									}
+									if (player.playerPosX > (b.width/2) + b.x) {
+										z.speedX += 0.2;
+										z.speedY = 0;
+									}
+									if (player.playerPosY >= b.y + b.height -1 && player.playerPosY <= b.y + b.height + 25) {
+										z.speedX += -0.2*Math.sin(z.angle);
+										z.speedY += -0.2*Math.cos(z.angle);
+									}
+								}
+
+							}
+
 						}
-
 					}
-
 				}
+
+
 			}
 
 			z.posX += z.speedX;
