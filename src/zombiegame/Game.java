@@ -718,7 +718,7 @@ public class Game {
 			if (!gameIsRunning) {
 				g2.setColor(Color.black);
 				g2.fillRect(0, 0, panW, panH);
-				
+
 				g2.setColor(Color.white);
 				g2.setFont(new Font("Serif", Font.BOLD, 65));
 				g2.drawString("NUCLEAR WARZONE", 70, 150);
@@ -849,6 +849,22 @@ public class Game {
 					g2.setFont(new Font("Helvetica", Font.BOLD, 40));
 					g2.setColor(Color.white);
 					g2.drawString("GAME OVER", 280, panH/2 - 20);
+
+					//g2.drawRect(300, 290, 205, 30);
+					g2.setFont(new Font("Helvetica", Font.BOLD, 25));
+
+					if (mouseX >= 300 && mouseX <= 300+205 && mouseY >= 290 && mouseY <= 290 + 30) {
+						g2.setColor(Color.yellow);
+					}
+					else {
+						g2.setColor(Color.white);
+					}
+
+					g2.drawString("Return to Menu", 310, 315);
+
+
+
+
 					SLEEP = 32;
 				}
 			}
@@ -871,11 +887,18 @@ public class Game {
 			mouseClickY = e.getY();
 
 			if (gameIsRunning) {
-				createBullets(mouseClickX, mouseClickY);
+				if (playerAlive) {
+					createBullets(mouseClickX, mouseClickY); //shoot bullets
+				}
+				else {
+					if (mouseClickX >= 300 && mouseClickX <= 300+205 && mouseClickY >= 290 && mouseClickY <= 290 + 30) {
+						gameIsRunning = false; //return to menu
+					}
+				}
 			}
 			else {
 				if (mouseClickX >= 270 && mouseClickX <= 270+260 && mouseClickY >= 220 && mouseClickY <= 220 + 40) {
-					gameIsRunning = true;
+					gameIsRunning = true; //start game
 				}
 			}
 		}
@@ -931,6 +954,10 @@ public class Game {
 
 				}
 
+			}
+
+			if (e.getKeyChar() == 'g') {
+				playerAlive = false;
 			}
 		}
 	}
