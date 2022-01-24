@@ -49,7 +49,7 @@ public class Game {
 	//status boolean
 	boolean programIsRunning = true;
 	boolean gameIsRunning = false;
-	boolean playerAlive = true;
+	boolean playerAlive = false;
 	boolean roundOver = false;
 	boolean hitboxOn = false; //causes "hot code replace failed" to pop up, no idea what that means
 
@@ -58,7 +58,7 @@ public class Game {
 	Player player = new Player(400-17,300-17,0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
-	ArrayList<Building> buildingList = new ArrayList<>();
+	ArrayList<Obstacle> buildingList = new ArrayList<>();
 
 	boolean[] keys = {false,false,false,false};
 	static final int UP=0, DOWN=1, LEFT=2, RIGHT=3; 
@@ -84,7 +84,7 @@ public class Game {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.add(panel);
 
-		setup();
+		//setup();
 		new GfxThread().start();
 		new LogicThread().start();
 		new HealthThread().start();
@@ -98,6 +98,13 @@ public class Game {
 
 	void setup() {
 
+		playerAlive = true;
+		SLEEP = 8;
+		round = 0;
+		zombieList.clear();
+		buildingList.clear();
+		bulletList.clear();
+		
 		//set ground tiles
 
 		for (int i = 0; i < GRID; i++) {
@@ -116,10 +123,10 @@ public class Game {
 		//create buildings
 
 		//x pos, y pos, width, height, colour
-		Building shack = new Building(20, 20, 200, 140, Color.decode("#452522"));
+		Obstacle shack = new Obstacle(20, 20, 200, 140, Color.decode("#452522"));
 		buildingList.add(shack);
 
-		Building warehouse = new Building(1000, 10, 400, 700, Color.gray);
+		Obstacle warehouse = new Obstacle(1000, 10, 400, 700, Color.gray);
 		buildingList.add(warehouse);
 
 	}
@@ -170,11 +177,11 @@ public class Game {
 					}
 				}
 
-		for (Building b: buildingList) {
-				
-			if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
-						
-				if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
+				for (Obstacle b: buildingList) {
+
+					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
+
+						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
 							if ((int)(Math.random()*2) == 1) {
 
 								//change x
@@ -198,7 +205,7 @@ public class Game {
 				}
 				zombieList.add(z);
 			}
-			
+
 		}
 	}
 	void movePlayer() {
@@ -258,7 +265,7 @@ public class Game {
 		}
 
 		//against buildings
-		for (Building b : buildingList) {
+		for (Obstacle b : buildingList) {
 
 
 			//bottom of building
@@ -334,7 +341,7 @@ public class Game {
 
 		}
 
-		for (Building b : buildingList) {
+		for (Obstacle b : buildingList) {
 			b.x -= player.playerSpeedX;
 			b.y -= player.playerSpeedY;
 		}
@@ -368,7 +375,7 @@ public class Game {
 
 			//pathfinding around buildings
 
-			for (Building b : buildingList) {
+			for (Obstacle b : buildingList) {
 
 
 				//if zombie is to the right of building (within a 25 pixel margin)
@@ -589,7 +596,7 @@ public class Game {
 
 				//if bullet hits a building
 				for (int k = 0; k < buildingList.size(); k++) {
-					Building build = buildingList.get(k);
+					Obstacle build = buildingList.get(k);
 					if(b.posX >= build.x && b.posX <= build.x+build.width) {
 
 						if (b.posY >= build.y && b.posY <= build.y+build.height) {
@@ -702,6 +709,15 @@ public class Game {
 			}
 		}
 	}
+	
+	void createBuilding(double x, double y) {
+		
+		if (playerScore >= 100) {
+			playerScore -= 100;
+			Obstacle b = new Obstacle (x, y, 20, 20, Color.BLACK);
+			buildingList.add(b);
+		}
+	}
 
 	@SuppressWarnings("serial")
 	class GamePanel extends JPanel {
@@ -712,19 +728,19 @@ public class Game {
 
 		Color heartClr = new Color(181,40,43);
 		Color groundClr = new Color(179,156,120);
-		
+
 		Font helvetica = new Font ("Helvetica", Font.BOLD, 18);
 		Font titleFont = new Font ("Serif", Font.BOLD, 65);
 		Font enterFont = new Font ("Helvetica", Font.BOLD, 25);
-		
+
 		GamePanel() {
 
 			imgTextureTile = loadImage("texturetile1.jpg");
 			imgTextureTile2 = loadImage("texturetile4.jpg");
 			imgHeart = loadImage("heart.png");
-			
-			
-			
+
+
+
 			this.setBackground(Color.decode("#66c1d1"));
 			this.setPreferredSize(new Dimension(panW,panH));
 
@@ -829,7 +845,7 @@ public class Game {
 
 				//draw buildings
 
-				for (Building b : buildingList) {
+				for (Obstacle b : buildingList) {
 
 					g2.setColor(new Color(0,0,0,40));
 
@@ -837,7 +853,7 @@ public class Game {
 
 				}
 
-				for (Building b : buildingList) {
+				for (Obstacle b : buildingList) {
 
 					g2.setColor(b.colour);
 
@@ -930,8 +946,9 @@ public class Game {
 		public void mouseClicked(MouseEvent e) {
 			// TODO Auto-generated method stub
 
-			mouseClickX = e.getX();
-			mouseClickY = e.getY();
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				mouseClickX = e.getX();
+				mouseClickY = e.getY();
 
 			if (gameIsRunning) {
 				if (playerAlive) {
@@ -945,166 +962,176 @@ public class Game {
 			}
 			else {
 				if (mouseClickX >= 270 && mouseClickX <= 270+260 && mouseClickY >= 220 && mouseClickY <= 220 + 40) {
+					setup();
 					gameIsRunning = true; //start game
 				}
 			}
-		}
 
-		@Override
-		public void mousePressed(MouseEvent e) {}
-		@Override
-		public void mouseReleased(MouseEvent e) {}
-		@Override
-		public void mouseEntered(MouseEvent e) {}
-		@Override
-		public void mouseExited(MouseEvent e) {}
+		}
+			
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			if (playerAlive) {
+				createBuilding(e.getX(), e.getY());
+			}
+			
+		}
 	}
 
-	class WAL implements KeyListener { 
+	@Override
+	public void mousePressed(MouseEvent e) {}
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+	@Override
+	public void mouseEntered(MouseEvent e) {}
+	@Override
+	public void mouseExited(MouseEvent e) {}
+}
 
-		@Override
-		public void keyPressed(KeyEvent e) {
+class WAL implements KeyListener { 
 
-			int key = e.getKeyCode();
+	@Override
+	public void keyPressed(KeyEvent e) {
 
-			if (key == 'W') keys[UP] = true;
-			if (key == 'A') keys[LEFT] = true;
-			if (key == 'S') keys[DOWN] = true; 
-			if (key == 'D') keys[RIGHT] = true; 
+		int key = e.getKeyCode();
+
+		if (key == 'W') keys[UP] = true;
+		if (key == 'A') keys[LEFT] = true;
+		if (key == 'S') keys[DOWN] = true; 
+		if (key == 'D') keys[RIGHT] = true; 
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+
+		int key = e.getKeyCode();
+
+		if (key == 'W') keys[UP] = false;
+		if (key == 'A') keys[LEFT] = false;
+		if (key == 'S') keys[DOWN] = false; 
+		if (key == 'D') keys[RIGHT] = false; 
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+
+		//enable or disable hitboxes by pressing b
+		if (gameIsRunning) {
+			if (e.getKeyChar() == 'b') {
+
+				if (hitboxOn) {
+					hitboxOn = false;
+				}
+				else {
+					hitboxOn = true;
+				}
+
+			}
 
 		}
 
-		@Override
-		public void keyReleased(KeyEvent e) {
-
-			int key = e.getKeyCode();
-
-			if (key == 'W') keys[UP] = false;
-			if (key == 'A') keys[LEFT] = false;
-			if (key == 'S') keys[DOWN] = false; 
-			if (key == 'D') keys[RIGHT] = false; 
+		if (e.getKeyChar() == 'g') {
+			playerAlive = false;
 		}
+	}
+}
 
-		@Override
-		public void keyTyped(KeyEvent e) {
+class MotionAL implements MouseMotionListener {
 
-			//enable or disable hitboxes by pressing b
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+
+		mouseX = e.getX();
+		mouseY = e.getY();
+
+		if (gameIsRunning) {
+			double x = Math.abs(mouseX - (panW/2));
+			double y = Math.abs(mouseY - (panH/2));
+
+			double angle = Math.atan((y/x));
+
+			System.out.println(x);
+
+			//cast rule
+			if (e.getX() > panW/2) {
+
+				if (e.getY() > panH/2) {
+					//do nothing
+				}
+
+				if (e.getY() < panH/2) {
+					angle = 2*Math.PI - angle;
+				}
+
+
+			}
+			if (e.getX() < panW/2) {
+
+				if (e.getY() > panH/2) {
+					angle = Math.PI - angle;
+				}
+
+				if (e.getY() < panH/2) {
+					angle = Math.PI + angle;
+				}
+
+			}
+
+			angle += Math.PI/2;
+
+			player.rotation(angle);
+
+		}
+	}
+
+}
+
+/*****************************************************/
+/*				Thread classes						 */
+/*****************************************************/
+class LogicThread extends Thread {
+	public void run() {
+		while (true) {
+			try { Thread.sleep(SLEEP);
+			} catch (InterruptedException e) {}
+
 			if (gameIsRunning) {
-				if (e.getKeyChar() == 'b') {
-
-					if (hitboxOn) {
-						hitboxOn = false;
-					}
-					else {
-						hitboxOn = true;
-					}
-
-				}
-
+				movePlayer();
+				moveZombies();
+				shootBullets();
+				spawnZombies();
+				gameStatus();
 			}
 
-			if (e.getKeyChar() == 'g') {
-				playerAlive = false;
-			}
 		}
 	}
+};
 
-	class MotionAL implements MouseMotionListener {
+class GfxThread extends Thread {
+	public void run() {
+		while(true) {
+			try { Thread.sleep(8);
+			} catch (InterruptedException e) {}
 
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			// TODO Auto-generated method stub
-
+			panel.repaint();
 		}
+	}
+};
 
-		@Override
-		public void mouseMoved(MouseEvent e) {
-
-			mouseX = e.getX();
-			mouseY = e.getY();
-
+class HealthThread extends Thread {
+	public void run() {
+		while (true) {
+			try { Thread.sleep(SLEEP);
+			} catch (InterruptedException e) {}
 			if (gameIsRunning) {
-				double x = Math.abs(mouseX - (panW/2));
-				double y = Math.abs(mouseY - (panH/2));
-
-				double angle = Math.atan((y/x));
-
-				System.out.println(x);
-
-				//cast rule
-				if (e.getX() > panW/2) {
-
-					if (e.getY() > panH/2) {
-						//do nothing
-					}
-
-					if (e.getY() < panH/2) {
-						angle = 2*Math.PI - angle;
-					}
-
-
-				}
-				if (e.getX() < panW/2) {
-
-					if (e.getY() > panH/2) {
-						angle = Math.PI - angle;
-					}
-
-					if (e.getY() < panH/2) {
-						angle = Math.PI + angle;
-					}
-
-				}
-
-				angle += Math.PI/2;
-
-				player.rotation(angle);
-
+				checkHealth();
 			}
-		}
+		} } };
 
-	}
-
-	/*****************************************************/
-	/*				Thread classes						 */
-	/*****************************************************/
-	class LogicThread extends Thread {
-		public void run() {
-			while (true) {
-				try { Thread.sleep(SLEEP);
-				} catch (InterruptedException e) {}
-
-				if (gameIsRunning) {
-					movePlayer();
-					moveZombies();
-					shootBullets();
-					spawnZombies();
-					gameStatus();
-				}
-
-			}
-		}
-	};
-
-	class GfxThread extends Thread {
-		public void run() {
-			while(true) {
-				try { Thread.sleep(8);
-				} catch (InterruptedException e) {}
-
-				panel.repaint();
-			}
-		}
-	};
-
-	class HealthThread extends Thread {
-		public void run() {
-			while (true) {
-				try { Thread.sleep(SLEEP);
-				} catch (InterruptedException e) {}
-				if (gameIsRunning) {
-					checkHealth();
-				}
-			} } };
-
-}	
+	}	
