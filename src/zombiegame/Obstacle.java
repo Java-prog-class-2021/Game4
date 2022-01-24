@@ -2,7 +2,7 @@ package zombiegame;
 
 import java.awt.Color;
 
-public class Building {
+public class Obstacle {
 
 	double x;
 	double y;
@@ -10,7 +10,7 @@ public class Building {
 	double height;
 	Color colour;
 	
-	Building (double x, double y, double width, double height, Color colour) {
+	Obstacle (double x, double y, double width, double height, Color colour) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
