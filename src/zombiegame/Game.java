@@ -169,11 +169,35 @@ public class Game {
 					}
 				}
 
+		for (Building b: buildingList) {
+					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
+						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
+							if ((int)(Math.random()*2) == 1) {
+
+								//change x
+
+								while (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
+									z.posX = (int)(Math.random()*border.width)+border.x;
+								}
+							}
+							else {
+
+								//change y
+
+								while (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
+									z.posY = (int)(Math.random()*border.height)+border.y;
+								}
+							}
+						}
+					}
+
+
+				}
 				zombieList.add(z);
 			}
+			
 		}
 	}
-
 	void movePlayer() {
 
 		//movement speed
