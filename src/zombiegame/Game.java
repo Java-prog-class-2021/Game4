@@ -104,7 +104,8 @@ public class Game {
 
 			for (int j = 0; j < GRID; j++) {
 
-				board[i][j] = 1;
+				if (Math.random() > 0.3) board[i][j] = 1;
+				else board[i][j] = 2;
 
 			}
 
@@ -170,8 +171,10 @@ public class Game {
 				}
 
 		for (Building b: buildingList) {
-					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
-						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
+				
+			if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
+						
+				if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
 							if ((int)(Math.random()*2) == 1) {
 
 								//change x
@@ -704,10 +707,24 @@ public class Game {
 	class GamePanel extends JPanel {
 
 		Image imgTextureTile;
+		Image imgTextureTile2;
+		Image imgHeart;
 
+		Color heartClr = new Color(181,40,43);
+		Color groundClr = new Color(179,156,120);
+		
+		Font helvetica = new Font ("Helvetica", Font.BOLD, 18);
+		Font titleFont = new Font ("Serif", Font.BOLD, 65);
+		Font enterFont = new Font ("Helvetica", Font.BOLD, 25);
+		
 		GamePanel() {
 
 			imgTextureTile = loadImage("texturetile1.jpg");
+			imgTextureTile2 = loadImage("texturetile4.jpg");
+			imgHeart = loadImage("heart.png");
+			
+			
+			
 			this.setBackground(Color.decode("#66c1d1"));
 			this.setPreferredSize(new Dimension(panW,panH));
 
@@ -763,6 +780,8 @@ public class Game {
 
 			if (gameIsRunning) {
 				//draw ground tiles 
+				g2.setColor(groundClr);
+				g2.fillRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
 				//	int treeTileWidth = imgTreeTile.getWidth(null);
 				//	int treeTileHeight = imgTreeTile.getWidth(null);
 				int textureTileWidth = imgTextureTile.getWidth(null);
@@ -778,6 +797,9 @@ public class Game {
 
 						if (board[i][j]==1) {
 							g2.drawImage(imgTextureTile, (int)border.x+(i*textureTileWidth),(int)border.y+(j*textureTileHeight), null);
+						}
+						if (board[i][j] == 2) {
+							g2.drawImage(imgTextureTile2, (int)border.x+(i*textureTileWidth),(int)border.y+(j*textureTileHeight), null);
 						}
 					}
 				}
@@ -837,11 +859,12 @@ public class Game {
 				g2.drawString("Round: " + round, 30, panH-30);
 
 				//health display
-				g2.setColor(Color.red);
-				//g2.drawString("❤", 20,30); //this will probably get replaced by a sprite
+				if (imgHeart ==null) return;
+				g2.setColor(heartClr);
+				g2.drawImage(imgHeart, 20, 12, null);
 				g2.fillRect(55, 15, (int)(100*(player.health/50)), 12);
-				g2.setColor(Color.white);
-				g2.setFont(new Font("Helvetica", Font.BOLD, 20));
+				g2.setColor(heartClr);
+				g2.setFont(helvetica);
 				g2.drawString(""+(int)player.health, 162, 29);
 
 
