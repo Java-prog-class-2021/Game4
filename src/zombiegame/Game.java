@@ -12,7 +12,6 @@
  * Date started: December 12, 2021
  */
 
-
 package zombiegame;
 
 import java.awt.BasicStroke;
@@ -32,7 +31,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.net.URL;
 import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -45,16 +43,29 @@ public class Game {
 	int panH = 600;
 	JFrame window;
 	GamePanel panel;
-	
 	long now;
 	long prev;
+	
+	//color variables
+	Color heartClr = new Color(181,40,43);
+	Color groundClr = new Color(179,156,120);
+	Color bulletClr = Color.decode("#444444");
+	Color gameoverClr = new Color(200,0,0,100);
+
+	//font variables
+	Font helvetica = new Font ("Helvetica", Font.BOLD, 18);
+	Font titleFont = new Font ("Serif", Font.BOLD, 65);
+	Font enterFont = new Font ("Helvetica", Font.BOLD, 25);
+	Font scoreFont = new Font ("Helvetica", Font.BOLD, 24);
+	Font gameoverFont = new Font("Helvetica", Font.BOLD, 40);
+	Font returnFont = new Font("Helvetica", Font.BOLD, 25);
 
 	//status boolean
 	boolean programIsRunning = true;
 	boolean gameIsRunning = false;
 	boolean playerAlive = false;
 	boolean roundOver = false;
-	boolean hitboxOn = false; //causes "hot code replace failed" to pop up, no idea what that means
+	boolean hitboxOn = false; 
 
 	//instance variables
 	Border border = new Border();
@@ -63,9 +74,11 @@ public class Game {
 	ArrayList<Bullet> bulletList = new ArrayList<>();
 	ArrayList<Obstacle> buildingList = new ArrayList<>();
 
+	//movement variables
 	boolean[] keys = {false,false,false,false};
 	static final int UP=0, DOWN=1, LEFT=2, RIGHT=3; 
 
+	//score, round, & default sleep timer variables
 	int playerScore = 0;
 	int round = 0;
 	int SLEEP = 8;
@@ -73,7 +86,6 @@ public class Game {
 
 	int GRID = (int)(border.width/200);
 	int board[][] = new int [GRID][GRID];
-
 	int mouseX, mouseY, mouseClickX, mouseClickY;
 
 	public static void main (String[] args) {
@@ -87,7 +99,7 @@ public class Game {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.add(panel);
 
-		//setup();
+		//starts the threads
 		new GfxThread().start();
 		new LogicThread().start();
 		new HealthThread().start();
@@ -101,6 +113,7 @@ public class Game {
 
 	void setup() {
 
+		//game restarts if user decides to play again 
 		playerAlive = true;
 		SLEEP = 8;
 		round = 0;
@@ -121,8 +134,6 @@ public class Game {
 
 		}
 
-		//spawnZombies();
-
 		//create buildings
 
 		//x pos, y pos, width, height, colour
@@ -141,8 +152,6 @@ public class Game {
 			roundOver = true;
 
 			for (int i = 0; i < 3*(round) + 6; i++) {
-
-
 				Zombie z = new Zombie ();
 				z.fullHealth += 10;
 
@@ -157,14 +166,13 @@ public class Game {
 				z.posX = (int)(Math.random()*border.width)+border.x;
 				z.posY = (int)(Math.random()*border.height)+border.y;
 
-
 				//make sure zombies spawn off screen
 				if (z.posX + z.width >= 0 && z.posX < panW && z.posY + z.height >= 0 && z.posY < panH) { //if zombie is within screen dimensions
 
 					//50% chance of changing the x position, 50% chance of changing the y position
 					if ((int)(Math.random()*2) == 1) {
 
-						//change x
+						//change x position
 
 						while (z.posX + z.width >= 0 && z.posX < panW) {
 							z.posX = (int)(Math.random()*border.width)+border.x;
@@ -172,7 +180,7 @@ public class Game {
 					}
 					else {
 
-						//change y
+						//change y position
 
 						while (z.posY + z.height >= 0 && z.posY < panH) {
 							z.posY = (int)(Math.random()*border.height)+border.y;
@@ -180,6 +188,7 @@ public class Game {
 					}
 				}
 
+				//prevents zombies from spawning in buildings
 				for (Obstacle b: buildingList) {
 
 					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
@@ -187,7 +196,7 @@ public class Game {
 						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
 							if ((int)(Math.random()*2) == 1) {
 
-								//change x
+								//change x position
 
 								while (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
 									z.posX = (int)(Math.random()*border.width)+border.x;
@@ -195,7 +204,7 @@ public class Game {
 							}
 							else {
 
-								//change y
+								//change y position
 
 								while (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
 									z.posY = (int)(Math.random()*border.height)+border.y;
@@ -203,18 +212,14 @@ public class Game {
 							}
 						}
 					}
-
-
 				}
 				zombieList.add(z);
 			}
-
 		}
 	}
 	void movePlayer() {
 
-		//movement speed
-
+		//movement speed variables
 		player.playerSpeedX = 0;
 		player.playerSpeedY = 0;
 
@@ -274,13 +279,11 @@ public class Game {
 			//bottom of building
 			if (keys[UP]) {
 				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
-
+					
 					if (player.playerPosY <= b.y + b.height + 1 && player.playerPosY >= b.y + b.height -1) {
 
 						player.playerSpeedY = 0;
-
 					}
-
 				}
 			}
 
@@ -291,9 +294,7 @@ public class Game {
 					if (player.playerPosY + player.playerHeight <= b.y + 1 && player.playerPosY + player.playerHeight >= b.y-1) {
 
 						player.playerSpeedY = 0;
-
 					}
-
 				}
 			}
 
@@ -305,9 +306,7 @@ public class Game {
 					if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x-1) {
 
 						player.playerSpeedX = 0;
-
 					}
-
 				}
 			}
 
@@ -318,30 +317,22 @@ public class Game {
 					if (player.playerPosX <= b.x + b.width +  1 && player.playerPosX>= b.x + b.width-1) {
 
 						player.playerSpeedX = 0;
-
 					}
-
 				}
 			}
-
 		}
-
-
-
+		
 		//update the positions of all the surroundings
-
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
 			z.posX -= player.playerSpeedX;
 			z.posY -= player.playerSpeedY;
-
 		}
 
 		for (int i = 0; i < bulletList.size(); i++) {
 			Bullet b = bulletList.get(i);
 			b.posX -= player.playerSpeedX;
 			b.posY -= player.playerSpeedY;
-
 		}
 
 		for (Obstacle b : buildingList) {
@@ -351,11 +342,9 @@ public class Game {
 
 		border.x -= player.playerSpeedX;
 		border.y -= player.playerSpeedY;
-
-	}
+		}
 
 	void moveZombies() {
-
 
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
@@ -368,7 +357,7 @@ public class Game {
 
 			//after round 1, movement speed of zombies increases per round
 			for (int j = 0; j < round; j++) {
-				if(round > 1 && roundOver) {
+				if (round > 1 && roundOver) {
 					z.speedX += -0.25*Math.sin(z.angle);
 					z.speedY += -0.25*Math.cos(z.angle);
 				}
@@ -377,7 +366,6 @@ public class Game {
 
 
 			//pathfinding around buildings
-
 			for (Obstacle b : buildingList) {
 
 
@@ -398,14 +386,14 @@ public class Game {
 							if (player.playerPosY > (b.height/2) + b.y) {
 								z.speedX = 0;
 								z.speedY = 0.5;
-
 							}
 
 							if (player.playerPosX >= b.x + b.width - 1 && player.playerPosX <= b.x + b.width + 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
-
+							
+							//speed of zombies gets faster according to the round along w/ pathfinding
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
 									if (player.playerPosY <= (b.height/2) + b.y) {
@@ -427,7 +415,6 @@ public class Game {
 				}
 
 				//if zombie is to the left of building (within a 25 pixel margin)
-
 				if (z.posX + z.width <= b.x + 1 && z.posX + z.width >= b.x - 25) {
 
 					if (z.posY >= b.y - 25 && z.posY <= b.y + b.height + 25) {
@@ -444,14 +431,13 @@ public class Game {
 							if (player.playerPosY > (b.height/2) + b.y) {
 								z.speedX = 0;
 								z.speedY = 0.5;
-
 							}
 
 							if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x - 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
-
 							}
+							
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
 									if (player.playerPosY <= (b.height/2) + b.y) {
@@ -473,7 +459,6 @@ public class Game {
 				}
 
 				//if zombie is above building (within a 25 pixel margin)
-
 				if (z.posY + z.height <= b.y +1 && z.posY + z.height >= b.y - 25) {
 
 					if (z.posX + z.width >= b.x - 25 && z.posX <= b.x + b.width + 25) {
@@ -490,14 +475,13 @@ public class Game {
 							if (player.playerPosX > (b.width/2) + b.x) {
 								z.speedX = 0.5;
 								z.speedY = 0;
-
 							}
 
 							if (player.playerPosY + player.playerHeight <= b.y +1 && player.playerPosY + player.playerHeight >= b.y - 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
-
 							}
+							
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
 									if (player.playerPosX <= (b.width/2) + b.x) {
@@ -519,12 +503,11 @@ public class Game {
 						}
 					}
 				}
+				
 				//if zombie is below building (within a 25 pixel margin)
-
 				if (z.posY >= b.y + b.height -1 && z.posY <= b.y + b.height + 25) {
 
 					if (z.posX + z.width >= b.x - 25 && z.posX <= b.x+ b.width + 25) {
-
 
 						//if player is above zombie
 						if (player.playerPosY < z.posY) {
@@ -537,13 +520,11 @@ public class Game {
 							if (player.playerPosX > (b.width/2) + b.x) {
 								z.speedX = 0.5;
 								z.speedY = 0;
-
 							}
 
 							if (player.playerPosY >= b.y + b.height -1 && player.playerPosY <= b.y + b.height + 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
-
 							}
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
@@ -560,23 +541,16 @@ public class Game {
 										z.speedY += -0.2*Math.cos(z.angle);
 									}
 								}
-
 							}
-
 						}
 					}
 				}
-
-
 			}
 
 			z.posX += z.speedX;
 			z.posY += z.speedY;
-
 		}
 	}
-
-
 
 	void shootBullets() {
 
@@ -601,15 +575,12 @@ public class Game {
 						if (b.posY >= build.y && b.posY <= build.y+build.height) {
 							bulletList.remove(i);
 							return;
-
-
 						}
 					}
 				}
 
 
 				//if bullet hits the border
-
 				if (b.posX <= border.x) { //left side
 					bulletList.remove(i);
 					return;
@@ -629,7 +600,6 @@ public class Game {
 
 
 				//if bullet hits a zombie
-
 				if (b.posX >= z.posX && b.posX <= z.posX+z.width) {
 
 					if (b.posY >= z.posY && b.posY <= z.posY+z.height) {
@@ -637,72 +607,57 @@ public class Game {
 						z.health -= b.damage;
 						bulletList.remove(i);
 
-
 						//each zombie that is killed scores 10 points
 						if (z.health <= 0) {
 							zombieList.remove(j);
 							playerScore+=10;
 						}
-
 						return;
-
-
 					}
-
-
-
-
 				}
-
 			}
-
-
+			
 			b.posX += b.speedX;
 			b.posY += b.speedY;
-
 		}
 
 	}
 
 	void gameStatus() {
 
+		//if player reaches 0 health (or lower initially)
 		if (player.health <= 0) {
 			window.setTitle("Game over");
 			playerAlive = false;
 			player.health = 0; //so that player health doesn't display as negative
-
 		}
-
-
 	}
 
 	void createBullets(int x, int y) {
 
+		//where bullet is getting shot out from
 		double deltaX = Math.abs((player.playerPosX + (player.playerWidth/2)-4)-x);
 		double deltaY = Math.abs((player.playerPosY + (player.playerHeight/2)-4)-y);
 		double angle = Math.atan2(deltaY, deltaX);
 		Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
 
-
+		//bullet velocity
 		if (x > player.playerPosX) b.speedX = (double)(5*Math.cos(angle));
 		if (x < player.playerPosX) b.speedX = (double)(-5*Math.cos(angle));
 		if (y > player.playerPosY) b.speedY = (double)(5*Math.sin(angle));
 		if (y < player.playerPosY) b.speedY = (double)(-5*Math.sin(angle));
 		
-		now = System.currentTimeMillis();
-		
+	
+		now = System.currentTimeMillis();		
+		//bullet cooldown of 300 ms
 		if (now-prev >= 300) {
 			bulletList.add(b);	
 			prev = System.currentTimeMillis();
 		}
-
 	}
-
-
-	//FIXME: add a comment to explain what this does. or change method name
-	//It actually sees if a zombie is hitting you.
+	
+	//This method deducts health from the player if the zombie is making contact w/ a player
 	void checkHealth() {
-
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
 			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
@@ -731,20 +686,11 @@ public class Game {
 		Image imgTextureTile2;
 		Image imgHeart;
 
-		Color heartClr = new Color(181,40,43);
-		Color groundClr = new Color(179,156,120);
-
-		Font helvetica = new Font ("Helvetica", Font.BOLD, 18);
-		Font titleFont = new Font ("Serif", Font.BOLD, 65);
-		Font enterFont = new Font ("Helvetica", Font.BOLD, 25);
-
 		GamePanel() {
 
 			imgTextureTile = loadImage("texturetile1.jpg");
 			imgTextureTile2 = loadImage("texturetile4.jpg");
 			imgHeart = loadImage("heart.png");
-
-
 
 			this.setBackground(Color.decode("#66c1d1"));
 			this.setPreferredSize(new Dimension(panW,panH));
@@ -781,35 +727,31 @@ public class Game {
 				g2.setColor(Color.black);
 				g2.fillRect(0, 0, panW, panH);
 
+				//main title 
 				g2.setColor(Color.white);
-				g2.setFont(new Font("Serif", Font.BOLD, 65));
+				g2.setFont(titleFont);
 				g2.drawString("NUCLEAR WARZONE", 70, 150);
 
-				g2.setFont(new Font("Helvetica", Font.BOLD, 25));
-
-				//g2.drawRect(270, 220, 260, 40);
+				//game enter font, turns yellow if cursor is on text and white if not
+				g2.setFont(enterFont);
 				if (mouseX >= 270 && mouseX <= 270+260 && mouseY >= 220 && mouseY <= 220 + 40) {
 					g2.setColor(Color.yellow);
 				}
 				else {
 					g2.setColor(Color.white);
 				}
-
 				g2.drawString("Enter the WARZONE", 275, 250);
 
 			}
-
+			
 			if (gameIsRunning) {
 				//draw ground tiles 
 				g2.setColor(groundClr);
 				g2.fillRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
-				//	int treeTileWidth = imgTreeTile.getWidth(null);
-				//	int treeTileHeight = imgTreeTile.getWidth(null);
 				int textureTileWidth = imgTextureTile.getWidth(null);
 				int textureTileHeight = imgTextureTile.getHeight(null);
 
 				if (imgTextureTile == null) return;
-
 
 				//colour tiles
 				for (int i = 0; i < GRID; i++) {
@@ -833,7 +775,7 @@ public class Game {
 
 				//draw bullets
 				g2.setStroke(new BasicStroke(1));
-				g2.setColor(Color.decode("#444444"));
+				g2.setColor(bulletClr);
 				for (int i = 0; i < bulletList.size(); i++) {
 					Bullet b = bulletList.get(i);
 					g2.fill(new Ellipse2D.Double(b.posX, b.posY, b.width, b.height));
@@ -849,11 +791,9 @@ public class Game {
 				}
 
 				//draw buildings
-
 				for (Obstacle b : buildingList) {
 
-					g2.setColor(new Color(0,0,0,40));
-
+					g2.setColor(b.shadowColour);
 					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
 
 				}
@@ -861,7 +801,6 @@ public class Game {
 				for (Obstacle b : buildingList) {
 
 					g2.setColor(b.colour);
-
 					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
 
 				}
@@ -874,7 +813,7 @@ public class Game {
 				}
 
 				//score and round displays
-				g2.setFont(new Font("Helvetica", Font.BOLD, 24));
+				g2.setFont(scoreFont);
 				g2.setColor(Color.white);
 				g2.drawString("Score: " + playerScore, panW-180, panH-30);
 				g2.drawString("Round: " + round, 30, panH-30);
@@ -911,15 +850,15 @@ public class Game {
 					}
 				}
 
+				//game over screen
 				if (!playerAlive) {
-					g2.setColor(new Color(200,0,0,100));
+					g2.setColor(gameoverClr);
 					g2.fillRect(0,0,panW,panH);
-					g2.setFont(new Font("Helvetica", Font.BOLD, 40));
+					g2.setFont(gameoverFont);
 					g2.setColor(Color.white);
 					g2.drawString("GAME OVER", 280, panH/2 - 20);
 
-					//g2.drawRect(300, 290, 205, 30);
-					g2.setFont(new Font("Helvetica", Font.BOLD, 25));
+					g2.setFont(returnFont);
 
 					if (mouseX >= 300 && mouseX <= 300+205 && mouseY >= 290 && mouseY <= 290 + 30) {
 						g2.setColor(Color.yellow);
@@ -929,16 +868,11 @@ public class Game {
 					}
 
 					g2.drawString("Return to Menu", 310, 315);
-
-
-
-
+					
 					SLEEP = 32;
 				}
 			}
-
 		}
-
 	}
 
 	/*****************************************************/
@@ -957,8 +891,7 @@ public class Game {
 				if (gameIsRunning) {
 					if (playerAlive) {	
 						createBullets(mouseClickX, mouseClickY); //shoot bullets
-
-
+						
 					}
 
 					else {
@@ -973,14 +906,13 @@ public class Game {
 						gameIsRunning = true; //start game
 					}
 				}
-
 			}
 
+			//creates small obstacles if you right click
 			if (e.getButton() == MouseEvent.BUTTON3) {
 				if (playerAlive) {
 					createBuilding(e.getX(), e.getY());
 				}
-
 			}
 		}
 
@@ -1008,6 +940,7 @@ public class Game {
 
 		}
 
+		//stops player from moving in a direction if key is released
 		@Override
 		public void keyReleased(KeyEvent e) {
 
@@ -1032,9 +965,7 @@ public class Game {
 					else {
 						hitboxOn = true;
 					}
-
 				}
-
 			}
 
 			if (e.getKeyChar() == 'g') {
@@ -1047,10 +978,10 @@ public class Game {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			// TODO Auto-generated method stub
-
+			
 		}
 
+		//player rotation in relation to mouse movement
 		@Override
 		public void mouseMoved(MouseEvent e) {
 
@@ -1087,16 +1018,13 @@ public class Game {
 					if (e.getY() < panH/2) {
 						angle = Math.PI + angle;
 					}
-
 				}
 
 				angle += Math.PI/2;
 
 				player.rotation(angle);
-
 			}
 		}
-
 	}
 
 	/*****************************************************/
@@ -1140,5 +1068,4 @@ public class Game {
 					checkHealth();
 				}
 			} } };
-
 }	
