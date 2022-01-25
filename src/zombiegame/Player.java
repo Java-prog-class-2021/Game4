@@ -28,7 +28,7 @@ public class Player{
 		this.playerPosY = playerPosY;
 		this.playerSpeedX = playerSpeedX;
 		this.playerSpeedY = playerSpeedY;
-		imgPlayer1 = loadImage("pisotalposeOG_forward.png");
+		imgPlayer1 = loadImage("pisotalposeOG_center.png");
 		
 	}
 	Image loadImage(String filename) {
@@ -51,7 +51,7 @@ public class Player{
         //add to movement in game
 
         transform = AffineTransform.getTranslateInstance(playerPosX, playerPosY);
-        transform.rotate(rotAngle,imgPlayer1.getWidth(null)/2,imgPlayer1.getHeight(null)/2);
+        transform.rotate(rotAngle,imgPlayer1.getWidth(null)/2-35,imgPlayer1.getHeight(null)/2-35);
 
     }
 
@@ -66,7 +66,7 @@ public class Player{
         //    int player1H = imgPlayer1.getHeight(null);
 
         g2.setTransform(transform);
-        g2.drawImage(imgPlayer1, (int)0, (int)0, null);
+        g2.drawImage(imgPlayer1, (int)-35, (int)-35, null);
         g2.setTransform(new AffineTransform());
 
     }
