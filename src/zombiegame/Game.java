@@ -1,5 +1,3 @@
-/**
- *
  * Widaad
  * 
  * Hermela
@@ -770,7 +768,7 @@ public class Game {
 				g2.setColor(Color.white);
 				g2.setFont(objectiveFont);
 				g2.drawString("WASD to move,", 325, 400);
-				g2.drawString("Mouse1/Left Click to shoot, Right Click to set a small obstacle down!", 85, 450);
+				g2.drawString("Mouse1/Left Click to shoot!", 265, 450);
 				
 				g2.setFont(enterFont);
 				if (mouseX >= 270 && mouseX <= 270+260 && mouseY >= 520 && mouseY <= 520 + 40) {
