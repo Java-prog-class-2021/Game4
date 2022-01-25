@@ -9,6 +9,7 @@ public class Obstacle {
 	double width;
 	double height;
 	Color colour;
+	Color shadowColour = new Color (0,0,0,40);
 	
 	Obstacle (double x, double y, double width, double height, Color colour) {
 		this.x = x;
@@ -16,6 +17,6 @@ public class Obstacle {
 		this.width = width;
 		this.height = height;
 		this.colour = colour;
-	}
+	 }
 	
 }
