@@ -1,3 +1,5 @@
+/**
+ *
  * Widaad
  * 
  * Hermela
@@ -84,7 +86,6 @@ public class Game {
 	int playerScore = 0;
 	int round = 0;
 	int SLEEP = 8;
-	double zfh = 50;
 
 	int GRID = (int)(border.width/200);
 	int board[][] = new int [GRID][GRID];
@@ -117,6 +118,7 @@ public class Game {
 
 		//game restarts if user decides to play again 
 		playerAlive = true;
+		player.health = 50;
 		SLEEP = 8;
 		round = 0;
 		zombieList.clear();
@@ -625,7 +627,6 @@ public class Game {
 		if (player.health <= 0) {
 			window.setTitle("Game over");
 			playerAlive = false;
-			player.health = 0; //so that player health doesn't display as negative
 		}
 	}
 
@@ -635,8 +636,32 @@ public class Game {
 		double deltaX = Math.abs((player.playerPosX + (player.playerWidth/2)-4)-x);
 		double deltaY = Math.abs((player.playerPosY + (player.playerHeight/2)-4)-y);
 		double angle = Math.atan2(deltaY, deltaX);
-		Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
+		
+		double bulletX, bulletY;
+		
+		
+		//CAST rule for angle adjustment (angle must be adjusted since gun is not centered)
+		
+		if (x > panW/2 && y < panH/2) angle -= 0.1;
+		if (x < panW/2 && y < panH/2) angle += 0.15;
+		if (x < panW/2 && y > panH/2) angle -= 0.2;
+		if (x > panW/2 && y > panH/2) angle += 0.15;
+		
+		//calculate x
+		
+		if (x >= player.playerPosX + (player.playerWidth/2)) bulletX = 50*Math.cos(angle);
+		else bulletX = -50*Math.cos(angle);
+		
+		//calculate y
+		
+		if (y >= player.playerPosY + (player.playerHeight/2)) bulletY = 50*Math.sin(angle);
+		else bulletY = -50*Math.sin(angle);
+		
+		//Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
+		Bullet b = new Bullet(player.playerPosX+(player.playerWidth/2)+bulletX,player.playerPosY+(player.playerHeight/2)+bulletY,0,0);
 
+		angle = Math.atan2(Math.abs(player.playerPosY+(player.playerHeight/2)+bulletY-y), Math.abs(player.playerPosX+(player.playerWidth/2)+bulletX-x));
+		
 		//bullet velocity
 		if (x > player.playerPosX) b.speedX = (double)(5*Math.cos(angle));
 		if (x < player.playerPosX) b.speedX = (double)(-5*Math.cos(angle));
@@ -658,19 +683,13 @@ public class Game {
 			Zombie z = zombieList.get(i);
 			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
 				player.health -= z.damage;
+				if (player.health <= 0) {
+					player.health = 0; //so that player health doesn't display as negative
+				}
 				try {
 					Thread.sleep(SLEEP*200);
 				} catch (InterruptedException e) {}
 			}
-		}
-	}
-
-	void createBuilding(double x, double y) {
-
-		if (playerScore >= 100) {
-			playerScore -= 100;
-			Obstacle b = new Obstacle (x, y, 20, 20, Color.BLACK);
-			buildingList.add(b);
 		}
 	}
 
@@ -819,7 +838,8 @@ public class Game {
 
 				//draw player
 				player.draw(g2);	
-
+				
+				
 				//draw zombies
 				for (int i = 0; i < zombieList.size(); i++) {
 					Zombie z = zombieList.get(i);
@@ -955,12 +975,6 @@ public class Game {
 					submenuIsRunning = false;
 					gameIsRunning = false;
 					
-				}
-			}
-			//creates small obstacles if you right click
-			if (e.getButton() == MouseEvent.BUTTON3) {
-				if (playerAlive) {
-					createBuilding(e.getX(), e.getY());
 				}
 			}
 		}
