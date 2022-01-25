@@ -662,7 +662,6 @@ public class Game {
 			Zombie z = zombieList.get(i);
 			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
 				player.health -= z.damage;
-				//FIXME: why is there a sleep here?
 				try {
 					Thread.sleep(SLEEP*200);
 				} catch (InterruptedException e) {}
