@@ -45,7 +45,7 @@ public class Game {
 	GamePanel panel;
 	long now;
 	long prev;
-	
+
 	//color variables
 	Color heartClr = new Color(181,40,43);
 	Color groundClr = new Color(179,156,120);
@@ -59,10 +59,14 @@ public class Game {
 	Font scoreFont = new Font ("Helvetica", Font.BOLD, 24);
 	Font gameoverFont = new Font("Helvetica", Font.BOLD, 40);
 	Font returnFont = new Font("Helvetica", Font.BOLD, 25);
-
+	Font submenuFont = new Font("Serif", Font.BOLD, 40);
+	Font objectiveFont = new Font("Helvetica", Font.BOLD, 20);
+	Font controlsFont = new Font("Courier", Font.ITALIC, 25);
+	
 	//status boolean
 	boolean programIsRunning = true;
 	boolean gameIsRunning = false;
+	boolean submenuIsRunning = false;
 	boolean playerAlive = false;
 	boolean roundOver = false;
 	boolean hitboxOn = false; 
@@ -131,7 +135,6 @@ public class Game {
 				else board[i][j] = 2;
 
 			}
-
 		}
 
 		//create buildings
@@ -279,7 +282,7 @@ public class Game {
 			//bottom of building
 			if (keys[UP]) {
 				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
-					
+
 					if (player.playerPosY <= b.y + b.height + 1 && player.playerPosY >= b.y + b.height -1) {
 
 						player.playerSpeedY = 0;
@@ -321,7 +324,7 @@ public class Game {
 				}
 			}
 		}
-		
+
 		//update the positions of all the surroundings
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
@@ -342,7 +345,7 @@ public class Game {
 
 		border.x -= player.playerSpeedX;
 		border.y -= player.playerSpeedY;
-		}
+	}
 
 	void moveZombies() {
 
@@ -362,8 +365,6 @@ public class Game {
 					z.speedY += -0.25*Math.cos(z.angle);
 				}
 			}
-
-
 
 			//pathfinding around buildings
 			for (Obstacle b : buildingList) {
@@ -392,7 +393,7 @@ public class Game {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
-							
+
 							//speed of zombies gets faster according to the round along w/ pathfinding
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
@@ -437,7 +438,7 @@ public class Game {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
-							
+
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
 									if (player.playerPosY <= (b.height/2) + b.y) {
@@ -481,7 +482,7 @@ public class Game {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
-							
+
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
 									if (player.playerPosX <= (b.width/2) + b.x) {
@@ -496,14 +497,12 @@ public class Game {
 										z.speedX += -0.2*Math.sin(z.angle);
 										z.speedY += -0.2*Math.cos(z.angle);
 									}
-
 								}
 							}
-
 						}
 					}
 				}
-				
+
 				//if zombie is below building (within a 25 pixel margin)
 				if (z.posY >= b.y + b.height -1 && z.posY <= b.y + b.height + 25) {
 
@@ -560,7 +559,6 @@ public class Game {
 			for (int j = 0; j < zombieList.size(); j++) {
 				Zombie z = zombieList.get(j);
 
-
 				//if bullet goes off screen
 				if (b.posX < 0 || b.posX >= panW || b.posY < 0 || b.posY >= panH) {
 					bulletList.remove(i);
@@ -616,7 +614,7 @@ public class Game {
 					}
 				}
 			}
-			
+
 			b.posX += b.speedX;
 			b.posY += b.speedY;
 		}
@@ -646,8 +644,8 @@ public class Game {
 		if (x < player.playerPosX) b.speedX = (double)(-5*Math.cos(angle));
 		if (y > player.playerPosY) b.speedY = (double)(5*Math.sin(angle));
 		if (y < player.playerPosY) b.speedY = (double)(-5*Math.sin(angle));
-		
-	
+
+
 		now = System.currentTimeMillis();		
 		//bullet cooldown of 300 ms
 		if (now-prev >= 300) {
@@ -655,7 +653,7 @@ public class Game {
 			prev = System.currentTimeMillis();
 		}
 	}
-	
+
 	//This method deducts health from the player if the zombie is making contact w/ a player
 	void checkHealth() {
 		for (int i = 0; i < zombieList.size(); i++) {
@@ -741,8 +739,49 @@ public class Game {
 				}
 				g2.drawString("Enter the WARZONE", 275, 250);
 
+
+				g2.setFont(submenuFont);
+				if (mouseX >= 285 && mouseX <= 285+510 && mouseY >= 470 && mouseY <= 470 + 40) {
+					g2.setColor(Color.yellow);
+				}
+				else {
+					g2.setColor(Color.white);
+				}
+				g2.drawString("How to Play", 295, 500);
 			}
 			
+			if (submenuIsRunning) {
+				g2.setColor(Color.black);
+				g2.fillRect(0, 0, panW, panH);
+				
+				g2.setColor(Color.white);
+				g2.setFont(titleFont);
+				g2.drawString("Objective", 265, 100);
+				
+				g2.setColor(Color.white);
+				g2.setFont(objectiveFont);
+				g2.drawString("Stay alive for as long as you can while accumulating a high score! ", 90, 200);
+				g2.drawString("Points can be accumulated by killing zombies. One kill equals ten points.", 65, 250);
+				
+				g2.setColor(Color.white);
+				g2.setFont(controlsFont);
+				g2.drawString("CONTROLS", 325, 350);
+				
+				g2.setColor(Color.white);
+				g2.setFont(objectiveFont);
+				g2.drawString("WASD to move,", 325, 400);
+				g2.drawString("Mouse1/Left Click to shoot, Right Click to set a small obstacle down!", 85, 450);
+				
+				g2.setFont(enterFont);
+				if (mouseX >= 270 && mouseX <= 270+260 && mouseY >= 520 && mouseY <= 520 + 40) {
+					g2.setColor(Color.yellow);
+				}
+				else {
+					g2.setColor(Color.white);
+				}
+				g2.drawString("RETURN TO MAIN MENU", 250, 550);
+			}
+
 			if (gameIsRunning) {
 				//draw ground tiles 
 				g2.setColor(groundClr);
@@ -867,7 +906,7 @@ public class Game {
 					}
 
 					g2.drawString("Return to Menu", 310, 315);
-					
+
 					SLEEP = 32;
 				}
 			}
@@ -890,7 +929,6 @@ public class Game {
 				if (gameIsRunning) {
 					if (playerAlive) {	
 						createBullets(mouseClickX, mouseClickY); //shoot bullets
-						
 					}
 
 					else {
@@ -899,6 +937,7 @@ public class Game {
 						}
 					}
 				}
+
 				else {
 					if (mouseClickX >= 270 && mouseClickX <= 270+260 && mouseClickY >= 220 && mouseClickY <= 220 + 40) {
 						setup();
@@ -907,6 +946,19 @@ public class Game {
 				}
 			}
 
+			if (!gameIsRunning) {
+				if (mouseClickX >= 285 && mouseClickX <= 285+510 && mouseClickY >= 470 && mouseClickY <= 470 + 40) {
+					submenuIsRunning = true;
+				}
+			}
+			
+			if (submenuIsRunning) {
+				if (mouseClickX >= 270 && mouseClickX <= 270+260 && mouseClickY >= 520 && mouseClickY <= 520 + 40) {
+					submenuIsRunning = false;
+					gameIsRunning = false;
+					
+				}
+			}
 			//creates small obstacles if you right click
 			if (e.getButton() == MouseEvent.BUTTON3) {
 				if (playerAlive) {
@@ -977,7 +1029,7 @@ public class Game {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			
+
 		}
 
 		//player rotation in relation to mouse movement
