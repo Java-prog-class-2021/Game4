@@ -10,7 +10,7 @@ This game is designed to be a top-down shooter game where a user-controlled play
 
 Controls: WASD to move, Mouse1/Left Click to shoot 
 Scoring: Each zombie kill = +10 pts 
-HP: The player initially starts with 50 Health, and every contact the player makes w/ a zombie is a loss of -8 health 
+HP: The player initially starts with 50 Health, and every contact the player makes w/ a zombie is a loss of -8 health (this damage increases by +2 per round)
 
 Objective: Kill as many zombies as possible for a high score & stay alive for as many rounds as you can! 
 
