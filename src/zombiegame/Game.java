@@ -99,6 +99,7 @@ public class Game {
 		window = new JFrame("Wastelander");
 		panel = new GamePanel();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.setResizable(false);
 		window.add(panel);
 
 		//starts the threads
@@ -635,25 +636,25 @@ public class Game {
 
 		//CAST rule for angle adjustment (angle must be adjusted since gun is not centered)
 
-		if (x > panW/2 && y < panH/2) angle -= 0.1;
-		if (x < panW/2 && y < panH/2) angle += 0.15;
-		if (x < panW/2 && y > panH/2) angle -= 0.2;
-		if (x > panW/2 && y > panH/2) angle += 0.15;
+//		if (x > panW/2 && y < panH/2) angle -= 0.1;
+//		if (x < panW/2 && y < panH/2) angle += 0.15;
+//		if (x < panW/2 && y > panH/2) angle -= 0.2;
+//		if (x > panW/2 && y > panH/2) angle += 0.15;
 
 		//calculate x
 
-		if (x >= player.playerPosX + (player.playerWidth/2)) bulletX = 50*Math.cos(angle);
-		else bulletX = -50*Math.cos(angle);
-
-		//calculate y
-
-		if (y >= player.playerPosY + (player.playerHeight/2)) bulletY = 50*Math.sin(angle);
-		else bulletY = -50*Math.sin(angle);
-
-		//Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
-		Bullet b = new Bullet(player.playerPosX+(player.playerWidth/2)+bulletX,player.playerPosY+(player.playerHeight/2)+bulletY,0,0);
-
-		angle = Math.atan2(Math.abs(player.playerPosY+(player.playerHeight/2)+bulletY-y), Math.abs(player.playerPosX+(player.playerWidth/2)+bulletX-x));
+//		if (x >= player.playerPosX + (player.playerWidth/2)) bulletX = 50*Math.cos(angle);
+//		else bulletX = -50*Math.cos(angle);
+//
+//		//calculate y
+//
+//		if (y >= player.playerPosY + (player.playerHeight/2)) bulletY = 50*Math.sin(angle);
+//		else bulletY = -50*Math.sin(angle);
+//
+		Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
+//		Bullet b = new Bullet(player.playerPosX+(player.playerWidth/2)+bulletX,player.playerPosY+(player.playerHeight/2)+bulletY,0,0);
+//
+//		angle = Math.atan2(Math.abs(player.playerPosY+(player.playerHeight/2)+bulletY-y), Math.abs(player.playerPosX+(player.playerWidth/2)+bulletX-x));
 
 		//bullet velocity
 		if (x > player.playerPosX) b.speedX = (double)(5*Math.cos(angle));
@@ -883,9 +884,9 @@ public class Game {
 
 				if (hitboxOn) {
 					//crosshair
-					g2.setColor(Color.red);
-					g2.drawLine(panW/2, 0, panW/2, panH);
-					g2.drawLine(0, panH/2, panW, panH/2);
+//					g2.setColor(Color.red);
+//					g2.drawLine(panW/2, 0, panW/2, panH);
+//					g2.drawLine(0, panH/2, panW, panH/2);
 
 					//draw player hitbox
 					g2.setStroke(new BasicStroke(4));
@@ -1061,10 +1062,13 @@ public class Game {
 				 * something with angle calculation was off, so these two if statements are here
 				 * to correct the angle
 				 */
-				if (angle == 0) {
+				if (angle == 0 && mouseY < panH/2) {
 					angle = Math.PI;
 				}
-				if (angle == Math.PI/2) {
+				
+				
+
+				if (angle == Math.PI/2 && mouseY < panH/2) {
 					angle = 3*Math.PI/2;
 				}
 
@@ -1093,7 +1097,7 @@ public class Game {
 				}
 
 				angle += Math.PI/2;
-
+				
 				player.rotation(angle);
 			}
 		}
