@@ -120,6 +120,8 @@ public class Game {
 		player.health = 50;
 		player.playerPosX = 400-17;
 		player.playerPosY = 300-17;
+		border.x = 400-1100;
+		border.y = 300-1100;
 		
 		SLEEP = 8;
 		round = 0;
@@ -142,10 +144,10 @@ public class Game {
 		//create buildings
 
 		//x pos, y pos, width, height, colour
-		Obstacle shack = new Obstacle(20, 20, 200, 140, "woodshack1.jpg");
+		Obstacle shack = new Obstacle(border.x+720, border.y+820, 200, 140, "woodshack1.jpg");
 		buildingList.add(shack);
 
-		Obstacle warehouse = new Obstacle(1000, 10, 400, 700, "factory.jpg");
+		Obstacle warehouse = new Obstacle(border.x+1700, border.y+810, 400, 700, "factory.jpg");
 		buildingList.add(warehouse);
 
 	}
