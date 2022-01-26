@@ -884,9 +884,9 @@ public class Game {
 
 				if (hitboxOn) {
 					//crosshair
-//					g2.setColor(Color.red);
-//					g2.drawLine(panW/2, 0, panW/2, panH);
-//					g2.drawLine(0, panH/2, panW, panH/2);
+					g2.setColor(Color.red);
+					g2.drawLine(panW/2, 0, panW/2, panH);
+					g2.drawLine(0, panH/2, panW, panH/2);
 
 					//draw player hitbox
 					g2.setStroke(new BasicStroke(4));
@@ -1062,14 +1062,16 @@ public class Game {
 				 * something with angle calculation was off, so these two if statements are here
 				 * to correct the angle
 				 */
-				if (angle == 0 && mouseY < panH/2) {
-					angle = Math.PI;
-				}
-				
-				
-
+//				if (angle == 0 && mouseY < panH/2) {
+//					angle = Math.PI;
+//				}
+//
 				if (angle == Math.PI/2 && mouseY < panH/2) {
 					angle = 3*Math.PI/2;
+				}
+				
+				if (angle == 0 && mouseX < panW/2) {
+					angle = Math.PI;
 				}
 
 				//cast rule
