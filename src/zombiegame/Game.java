@@ -118,6 +118,9 @@ public class Game {
 		//game restarts if user decides to play again 
 		playerAlive = true;
 		player.health = 50;
+		player.playerPosX = 400-17;
+		player.playerPosY = 300-17;
+		
 		SLEEP = 8;
 		round = 0;
 		zombieList.clear();
@@ -139,10 +142,10 @@ public class Game {
 		//create buildings
 
 		//x pos, y pos, width, height, colour
-		Obstacle shack = new Obstacle(20, 20, 200, 140, Color.decode("#452522"));
+		Obstacle shack = new Obstacle(20, 20, 200, 140, "woodshack1.jpg");
 		buildingList.add(shack);
 
-		Obstacle warehouse = new Obstacle(1000, 10, 400, 700, Color.gray);
+		Obstacle warehouse = new Obstacle(1000, 10, 400, 700, "factory.jpg");
 		buildingList.add(warehouse);
 
 	}
@@ -849,13 +852,15 @@ public class Game {
 
 					g2.setColor(b.shadowColour);
 					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
+					//b.draw(g2);
 
 				}
 
 				for (Obstacle b : buildingList) {
 
 					g2.setColor(b.colour);
-					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
+					//g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
+					b.draw(g2);
 
 				}
 
