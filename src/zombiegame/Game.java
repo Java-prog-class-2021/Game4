@@ -62,7 +62,7 @@ public class Game {
 	Font submenuFont = new Font("Serif", Font.BOLD, 40);
 	Font objectiveFont = new Font("Helvetica", Font.BOLD, 20);
 	Font controlsFont = new Font("Courier", Font.ITALIC, 25);
-	
+
 	//status boolean
 	boolean programIsRunning = true;
 	boolean gameIsRunning = false;
@@ -173,6 +173,7 @@ public class Game {
 				if (z.posX + z.width >= 0 && z.posX < panW && z.posY + z.height >= 0 && z.posY < panH) { //if zombie is within screen dimensions
 
 					//50% chance of changing the x position, 50% chance of changing the y position
+
 					if ((int)(Math.random()*2) == 1) {
 
 						//change x position
@@ -189,37 +190,31 @@ public class Game {
 							z.posY = (int)(Math.random()*border.height)+border.y;
 						}
 					}
-				}
 
+				}
 				//prevents zombies from spawning in buildings
 				for (Obstacle b: buildingList) {
 
-					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
+					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width + 75) {
+						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height + 75) {
 
-						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
-							if ((int)(Math.random()*2) == 1) {
-
-								//change x position
-
-								while (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width) {
-									z.posX = (int)(Math.random()*border.width)+border.x;
-								}
+							while (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width + 75) {
+								z.posX = (int)(Math.random()*border.width)+border.x;
 							}
-							else {
+						}
+						//change y position
 
-								//change y position
-
-								while (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height) {
-									z.posY = (int)(Math.random()*border.height)+border.y;
-								}
-							}
+						while (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height + 75) {
+							z.posY = (int)(Math.random()*border.height)+border.y;
 						}
 					}
 				}
 				zombieList.add(z);
 			}
+
 		}
 	}
+
 	void movePlayer() {
 
 		//movement speed variables
@@ -636,32 +631,32 @@ public class Game {
 		double deltaX = Math.abs((player.playerPosX + (player.playerWidth/2)-4)-x);
 		double deltaY = Math.abs((player.playerPosY + (player.playerHeight/2)-4)-y);
 		double angle = Math.atan2(deltaY, deltaX);
-		
+
 		double bulletX, bulletY;
-		
-		
+
+
 		//CAST rule for angle adjustment (angle must be adjusted since gun is not centered)
-		
+
 		if (x > panW/2 && y < panH/2) angle -= 0.1;
 		if (x < panW/2 && y < panH/2) angle += 0.15;
 		if (x < panW/2 && y > panH/2) angle -= 0.2;
 		if (x > panW/2 && y > panH/2) angle += 0.15;
-		
+
 		//calculate x
-		
+
 		if (x >= player.playerPosX + (player.playerWidth/2)) bulletX = 50*Math.cos(angle);
 		else bulletX = -50*Math.cos(angle);
-		
+
 		//calculate y
-		
+
 		if (y >= player.playerPosY + (player.playerHeight/2)) bulletY = 50*Math.sin(angle);
 		else bulletY = -50*Math.sin(angle);
-		
+
 		//Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
 		Bullet b = new Bullet(player.playerPosX+(player.playerWidth/2)+bulletX,player.playerPosY+(player.playerHeight/2)+bulletY,0,0);
 
 		angle = Math.atan2(Math.abs(player.playerPosY+(player.playerHeight/2)+bulletY-y), Math.abs(player.playerPosX+(player.playerWidth/2)+bulletX-x));
-		
+
 		//bullet velocity
 		if (x > player.playerPosX) b.speedX = (double)(5*Math.cos(angle));
 		if (x < player.playerPosX) b.speedX = (double)(-5*Math.cos(angle));
@@ -764,31 +759,31 @@ public class Game {
 				else {
 					g2.setColor(Color.white);
 				}
-				g2.drawString("How to Play", 295, 500);
+				g2.drawString("How to Play", 290, 500);
 			}
-			
+
 			if (submenuIsRunning) {
 				g2.setColor(Color.black);
 				g2.fillRect(0, 0, panW, panH);
-				
+
 				g2.setColor(Color.white);
 				g2.setFont(titleFont);
 				g2.drawString("Objective", 265, 100);
-				
+
 				g2.setColor(Color.white);
 				g2.setFont(objectiveFont);
 				g2.drawString("Stay alive for as long as you can while accumulating a high score! ", 90, 200);
 				g2.drawString("Points can be accumulated by killing zombies. One kill equals ten points.", 65, 250);
-				
+
 				g2.setColor(Color.white);
 				g2.setFont(controlsFont);
 				g2.drawString("CONTROLS", 325, 350);
-				
+
 				g2.setColor(Color.white);
 				g2.setFont(objectiveFont);
 				g2.drawString("WASD to move,", 325, 400);
 				g2.drawString("Mouse1/Left Click to shoot!", 265, 450);
-				
+
 				g2.setFont(enterFont);
 				if (mouseX >= 270 && mouseX <= 270+260 && mouseY >= 520 && mouseY <= 520 + 40) {
 					g2.setColor(Color.yellow);
@@ -838,8 +833,8 @@ public class Game {
 
 				//draw player
 				player.draw(g2);	
-				
-				
+
+
 				//draw zombies
 				for (int i = 0; i < zombieList.size(); i++) {
 					Zombie z = zombieList.get(i);
@@ -969,12 +964,12 @@ public class Game {
 					submenuIsRunning = true;
 				}
 			}
-			
+
 			if (submenuIsRunning) {
 				if (mouseClickX >= 270 && mouseClickX <= 270+260 && mouseClickY >= 520 && mouseClickY <= 520 + 40) {
 					submenuIsRunning = false;
 					gameIsRunning = false;
-					
+
 				}
 			}
 		}
@@ -1057,7 +1052,7 @@ public class Game {
 
 				double angle = Math.atan((y/x));
 
-				System.out.println(x);
+				//System.out.println(x);
 
 				//cast rule
 				if (e.getX() > panW/2) {
@@ -1106,7 +1101,7 @@ public class Game {
 					spawnZombies();
 					gameStatus();
 
-				}
+				}	
 			}
 		}
 	};
