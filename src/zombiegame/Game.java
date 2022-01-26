@@ -43,8 +43,7 @@ public class Game {
 	int panH = 600;
 	JFrame window;
 	GamePanel panel;
-	long now;
-	long prev;
+	long now, prevShot, prevHit; //to calculate delays between bullet shots and zombies hitting the player
 
 	//color variables
 	Color heartClr = new Color(181,40,43);
@@ -105,7 +104,6 @@ public class Game {
 		//starts the threads
 		new GfxThread().start();
 		new LogicThread().start();
-		new HealthThread().start();
 
 		window.pack();
 		window.setLocationRelativeTo(null);
@@ -666,9 +664,9 @@ public class Game {
 
 		now = System.currentTimeMillis();		
 		//bullet cooldown of 300 ms
-		if (now-prev >= 300) {
+		if (now-prevShot >= 300) {
 			bulletList.add(b);	
-			prev = System.currentTimeMillis();
+			prevShot = System.currentTimeMillis();
 		}
 	}
 
@@ -676,14 +674,18 @@ public class Game {
 	void checkHealth() {
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
+			now = System.currentTimeMillis();
+
 			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
-				player.health -= z.damage;
-				if (player.health <= 0) {
-					player.health = 0; //so that player health doesn't display as negative
+
+				if (now - prevHit >= 2000) { //player can only lose health ever 2 seconds
+					player.health -= z.damage;
+					prevHit = System.currentTimeMillis();
 				}
-				try {
-					Thread.sleep(SLEEP*200);
-				} catch (InterruptedException e) {}
+			}
+			
+			if (player.health <= 0) {
+				player.health = 0; //so that player health doesn't display as negative
 			}
 		}
 	}
@@ -1027,7 +1029,7 @@ public class Game {
 			}
 
 			if (e.getKeyChar() == 'g') {
-				playerAlive = false;
+				zombieList.clear();
 			}
 		}
 	}
@@ -1099,6 +1101,7 @@ public class Game {
 					moveZombies();
 					shootBullets();
 					spawnZombies();
+					checkHealth();
 					gameStatus();
 
 				}	
@@ -1117,13 +1120,4 @@ public class Game {
 		}
 	};
 
-	class HealthThread extends Thread {
-		public void run() {
-			while (true) {
-				try { Thread.sleep(SLEEP);
-				} catch (InterruptedException e) {}
-				if (gameIsRunning) {
-					checkHealth();
-				}
-			} } };
-}	
+}
