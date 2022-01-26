@@ -1054,7 +1054,19 @@ public class Game {
 
 				double angle = Math.atan((y/x));
 
-				//System.out.println(x);
+				System.out.println(angle);
+				
+				/* 
+				 * flipping was happening if the player was facing directly up or directly left
+				 * something with angle calculation was off, so these two if statements are here
+				 * to correct the angle
+				 */
+				if (angle == 0) {
+					angle = Math.PI;
+				}
+				if (angle == Math.PI/2) {
+					angle = 3*Math.PI/2;
+				}
 
 				//cast rule
 				if (e.getX() > panW/2) {
