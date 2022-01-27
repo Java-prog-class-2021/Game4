@@ -38,12 +38,11 @@ import javax.swing.JPanel;
 
 public class Game {
 
-	//global variables
-	int panW = 800;
-	int panH = 600;
+	//panel and JFrame
+	int panW = 800; //width
+	int panH = 600;	//height
 	JFrame window;
 	GamePanel panel;
-	long now, prevShot, prevHit; //to calculate delays between bullet shots and zombies hitting the player
 
 	//color variables
 	Color heartClr = new Color(181,40,43);
@@ -62,20 +61,19 @@ public class Game {
 	Font objectiveFont = new Font("Helvetica", Font.BOLD, 20);
 	Font controlsFont = new Font("Courier", Font.ITALIC, 25);
 
-	//status boolean
-	boolean programIsRunning = true;
+	//status booleans
 	boolean gameIsRunning = false;
 	boolean submenuIsRunning = false;
 	boolean playerAlive = false;
 	boolean roundOver = false;
 	boolean hitboxOn = false; 
 
-	//instance variables
+	//border, player, zombie, and obstacle variables
 	Border border = new Border();
 	Player player = new Player(400-17,300-17,0,0);
 	ArrayList<Zombie> zombieList = new ArrayList<>();
 	ArrayList<Bullet> bulletList = new ArrayList<>();
-	ArrayList<Obstacle> buildingList = new ArrayList<>();
+	ArrayList<Obstacle> obstacleList = new ArrayList<>();
 
 	//movement variables
 	boolean[] keys = {false,false,false,false};
@@ -84,11 +82,15 @@ public class Game {
 	//score, round, & default sleep timer variables
 	int playerScore = 0;
 	int round = 0;
-	int SLEEP = 8;
+	int SLEEP = 8; //default refresh rate
 
+	//divide the ground into tiles 200x200 in size
 	int GRID = (int)(border.width/200);
 	int board[][] = new int [GRID][GRID];
-	int mouseX, mouseY, mouseClickX, mouseClickY;
+	
+	int mouseX, mouseY, mouseClickX, mouseClickY; //for mouse clicks and mouse movement
+	
+	long now, prevShot, prevHit; //to calculate delays between bullet shots and zombies hitting the player
 
 	public static void main (String[] args) {
 		new Game();
@@ -118,15 +120,13 @@ public class Game {
 		//game restarts if user decides to play again 
 		playerAlive = true;
 		player.health = 50;
-		player.playerPosX = 400-17;
-		player.playerPosY = 300-17;
 		border.x = 400-1100;
 		border.y = 300-1100;
 		
 		SLEEP = 8;
 		round = 0;
 		zombieList.clear();
-		buildingList.clear();
+		obstacleList.clear();
 		bulletList.clear();
 
 		//set ground tiles
@@ -145,10 +145,10 @@ public class Game {
 
 		//x pos, y pos, width, height, colour
 		Obstacle shack = new Obstacle(border.x+720, border.y+820, 200, 140, "woodshack1.jpg");
-		buildingList.add(shack);
+		obstacleList.add(shack);
 
 		Obstacle warehouse = new Obstacle(border.x+1700, border.y+810, 400, 700, "factory.jpg");
-		buildingList.add(warehouse);
+		obstacleList.add(warehouse);
 
 	}
 
@@ -170,11 +170,11 @@ public class Game {
 				}
 
 				//spawn within borders
-				z.posX = (int)(Math.random()*border.width)+border.x;
-				z.posY = (int)(Math.random()*border.height)+border.y;
+				z.x = (int)(Math.random()*border.width)+border.x;
+				z.y = (int)(Math.random()*border.height)+border.y;
 
 				//make sure zombies spawn off screen
-				if (z.posX + z.width >= 0 && z.posX < panW && z.posY + z.height >= 0 && z.posY < panH) { //if zombie is within screen dimensions
+				if (z.x + z.width >= 0 && z.x < panW && z.y + z.height >= 0 && z.y < panH) { //if zombie is within screen dimensions
 
 					//50% chance of changing the x position, 50% chance of changing the y position
 
@@ -182,34 +182,34 @@ public class Game {
 
 						//change x position
 
-						while (z.posX + z.width >= 0 && z.posX < panW) {
-							z.posX = (int)(Math.random()*border.width)+border.x;
+						while (z.x + z.width >= 0 && z.x < panW) {
+							z.x = (int)(Math.random()*border.width)+border.x;
 						}
 					}
 					else {
 
 						//change y position
 
-						while (z.posY + z.height >= 0 && z.posY < panH) {
-							z.posY = (int)(Math.random()*border.height)+border.y;
+						while (z.y + z.height >= 0 && z.y < panH) {
+							z.y = (int)(Math.random()*border.height)+border.y;
 						}
 					}
 
 				}
 				//prevents zombies from spawning in buildings
-				for (Obstacle b: buildingList) {
+				for (Obstacle b: obstacleList) {
 
-					if (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width + 75) {
-						if (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height + 75) {
+					if (z.x + z.width >= b.x && z.x + z.width < b.x + b.width + 75) {
+						if (z.y + z.height >= b.y && z.y + z.height < b.y + b.height + 75) {
 
-							while (z.posX + z.width >= b.x && z.posX + z.width < b.x + b.width + 75) {
-								z.posX = (int)(Math.random()*border.width)+border.x;
+							while (z.x + z.width >= b.x && z.x + z.width < b.x + b.width + 75) {
+								z.x = (int)(Math.random()*border.width)+border.x;
 							}
 						}
 						//change y position
 
-						while (z.posY + z.height >= b.y && z.posY + z.height < b.y + b.height + 75) {
-							z.posY = (int)(Math.random()*border.height)+border.y;
+						while (z.y + z.height >= b.y && z.y + z.height < b.y + b.height + 75) {
+							z.y = (int)(Math.random()*border.height)+border.y;
 						}
 					}
 				}
@@ -222,80 +222,80 @@ public class Game {
 	void movePlayer() {
 
 		//movement speed variables
-		player.playerSpeedX = 0;
-		player.playerSpeedY = 0;
+		player.speedX = 0;
+		player.speedY = 0;
 
-		if (keys[UP])		player.playerSpeedY = -2;
-		if (keys[DOWN])		player.playerSpeedY =  2;		
-		if (keys[RIGHT]) 	player.playerSpeedX =  2;
-		if (keys[LEFT])		player.playerSpeedX = -2;		
+		if (keys[UP])		player.speedY = -2;
+		if (keys[DOWN])		player.speedY =  2;		
+		if (keys[RIGHT]) 	player.speedX =  2;
+		if (keys[LEFT])		player.speedX = -2;		
 
 		if (keys[UP] && keys[RIGHT]) {
-			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
-			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
+			player.speedX = 2*Math.cos(Math.toRadians(45));
+			player.speedY = -2*Math.sin(Math.toRadians(45));
 		}
 
 		if (keys[UP] && keys[LEFT]) {
-			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
-			player.playerSpeedY = -2*Math.sin(Math.toRadians(45));
+			player.speedX = -2*Math.cos(Math.toRadians(45));
+			player.speedY = -2*Math.sin(Math.toRadians(45));
 		}
 
 		if (keys[DOWN] && keys[RIGHT]) {
-			player.playerSpeedX = 2*Math.cos(Math.toRadians(45));
-			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
+			player.speedX = 2*Math.cos(Math.toRadians(45));
+			player.speedY = 2*Math.sin(Math.toRadians(45));
 		}
 
 		if (keys[DOWN] && keys[LEFT]) {
-			player.playerSpeedX = -2*Math.cos(Math.toRadians(45));
-			player.playerSpeedY = 2*Math.sin(Math.toRadians(45));
+			player.speedX = -2*Math.cos(Math.toRadians(45));
+			player.speedY = 2*Math.sin(Math.toRadians(45));
 		}
 
 		if (keys[DOWN] && keys[UP]) {
-			player.playerSpeedY = 0;
+			player.speedY = 0;
 		}
 
 		if (keys[LEFT] && keys[RIGHT]) {
-			player.playerSpeedX = 0;
+			player.speedX = 0;
 		}
 
 
 		//COLLISION
 		//against border
-		if (player.playerPosX <= border.x && keys[LEFT]) { //left of border
-			player.playerSpeedX = 0;
+		if (player.x <= border.x && keys[LEFT]) { //left of border
+			player.speedX = 0;
 		}
-		if (player.playerPosX + player.playerWidth >= border.x + border.width && keys[RIGHT]) { //right of border
-			player.playerSpeedX = 0;
+		if (player.x + player.width >= border.x + border.width && keys[RIGHT]) { //right of border
+			player.speedX = 0;
 		}
-		if (player.playerPosY <= border.y && keys[UP]) { //top of border
-			player.playerSpeedY = 0;
+		if (player.y <= border.y && keys[UP]) { //top of border
+			player.speedY = 0;
 		}
-		if (player.playerPosY + player.playerHeight >= border.y + border.height && keys[DOWN]) { //bottom of border
-			player.playerSpeedY = 0;
+		if (player.y + player.height >= border.y + border.height && keys[DOWN]) { //bottom of border
+			player.speedY = 0;
 		}
 
 		//against buildings
-		for (Obstacle b : buildingList) {
+		for (Obstacle b : obstacleList) {
 
 
 			//bottom of building
 			if (keys[UP]) {
-				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
+				if (player.x <= b.x+b.width && player.x+player.width >= b.x) {
 
-					if (player.playerPosY <= b.y + b.height + 1 && player.playerPosY >= b.y + b.height -1) {
+					if (player.y <= b.y + b.height + 1 && player.y >= b.y + b.height -1) {
 
-						player.playerSpeedY = 0;
+						player.speedY = 0;
 					}
 				}
 			}
 
 			//top of building
 			if (keys[DOWN]) {
-				if (player.playerPosX <= b.x+b.width && player.playerPosX+player.playerWidth >= b.x) {
+				if (player.x <= b.x+b.width && player.x+player.width >= b.x) {
 
-					if (player.playerPosY + player.playerHeight <= b.y + 1 && player.playerPosY + player.playerHeight >= b.y-1) {
+					if (player.y + player.height <= b.y + 1 && player.y + player.height >= b.y-1) {
 
-						player.playerSpeedY = 0;
+						player.speedY = 0;
 					}
 				}
 			}
@@ -303,22 +303,22 @@ public class Game {
 
 			//left of building
 			if (keys[RIGHT]) {
-				if (player.playerPosY <= b.y+b.height&& player.playerPosY+player.playerHeight >= b.y) {
+				if (player.y <= b.y+b.height&& player.y+player.height >= b.y) {
 
-					if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x-1) {
+					if (player.x + player.width <= b.x + 1 && player.x + player.width >= b.x-1) {
 
-						player.playerSpeedX = 0;
+						player.speedX = 0;
 					}
 				}
 			}
 
 			//right of building
 			if (keys[LEFT]) {
-				if (player.playerPosY <= b.y+b.height&& player.playerPosY+player.playerHeight >= b.y) {
+				if (player.y <= b.y+b.height&& player.y+player.height >= b.y) {
 
-					if (player.playerPosX <= b.x + b.width +  1 && player.playerPosX>= b.x + b.width-1) {
+					if (player.x <= b.x + b.width +  1 && player.x>= b.x + b.width-1) {
 
-						player.playerSpeedX = 0;
+						player.speedX = 0;
 					}
 				}
 			}
@@ -327,23 +327,23 @@ public class Game {
 		//update the positions of all the surroundings
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
-			z.posX -= player.playerSpeedX;
-			z.posY -= player.playerSpeedY;
+			z.x -= player.speedX;
+			z.y -= player.speedY;
 		}
 
 		for (int i = 0; i < bulletList.size(); i++) {
 			Bullet b = bulletList.get(i);
-			b.posX -= player.playerSpeedX;
-			b.posY -= player.playerSpeedY;
+			b.x -= player.speedX;
+			b.y -= player.speedY;
 		}
 
-		for (Obstacle b : buildingList) {
-			b.x -= player.playerSpeedX;
-			b.y -= player.playerSpeedY;
+		for (Obstacle b : obstacleList) {
+			b.x -= player.speedX;
+			b.y -= player.speedY;
 		}
 
-		border.x -= player.playerSpeedX;
-		border.y -= player.playerSpeedY;
+		border.x -= player.speedX;
+		border.y -= player.speedY;
 	}
 
 	void moveZombies() {
@@ -351,7 +351,7 @@ public class Game {
 		for (int i = 0; i < zombieList.size(); i++) {
 			Zombie z = zombieList.get(i);
 
-			z.angle = Math.atan2((z.posX - player.playerPosX), (z.posY - player.playerPosY));
+			z.angle = Math.atan2((z.x - player.x), (z.y - player.y));
 
 			//initial speed of zombies
 			z.speedX = -0.5*Math.sin(z.angle);
@@ -366,29 +366,29 @@ public class Game {
 			}
 
 			//pathfinding around buildings
-			for (Obstacle b : buildingList) {
+			for (Obstacle b : obstacleList) {
 
 
 				//if zombie is to the right of building (within a 25 pixel margin)
 
-				if (z.posX >= b.x + b.width - 1 && z.posX <= b.x + b.width + 25) {
+				if (z.x >= b.x + b.width - 1 && z.x <= b.x + b.width + 25) {
 
-					if (z.posY >= b.y - 25 && z.posY <= b.y + b.height + 25) {
+					if (z.y >= b.y - 25 && z.y <= b.y + b.height + 25) {
 
 						//if player is to the left of zombie
-						if (player.playerPosX < z.posX) {
+						if (player.x < z.x) {
 
-							if (player.playerPosY <= (b.height/2) + b.y) {
+							if (player.y <= (b.height/2) + b.y) {
 								z.speedX = 0;
 								z.speedY = -0.5;
 							}
 
-							if (player.playerPosY > (b.height/2) + b.y) {
+							if (player.y > (b.height/2) + b.y) {
 								z.speedX = 0;
 								z.speedY = 0.5;
 							}
 
-							if (player.playerPosX >= b.x + b.width - 1 && player.playerPosX <= b.x + b.width + 25) {
+							if (player.x >= b.x + b.width - 1 && player.x <= b.x + b.width + 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
@@ -396,15 +396,15 @@ public class Game {
 							//speed of zombies gets faster according to the round along w/ pathfinding
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
-									if (player.playerPosY <= (b.height/2) + b.y) {
+									if (player.y <= (b.height/2) + b.y) {
 										z.speedX = 0;
 										z.speedY += -0.2;
 									}
-									if (player.playerPosY > (b.height/2) + b.y) {
+									if (player.y > (b.height/2) + b.y) {
 										z.speedX = 0;
 										z.speedY += 0.2;
 									}
-									if (player.playerPosX >= b.x + b.width - 1 && player.playerPosX <= b.x + b.width + 25) {
+									if (player.x >= b.x + b.width - 1 && player.x <= b.x + b.width + 25) {
 										z.speedX += -0.2*Math.sin(z.angle);
 										z.speedY += -0.2*Math.cos(z.angle);
 									}
@@ -415,40 +415,40 @@ public class Game {
 				}
 
 				//if zombie is to the left of building (within a 25 pixel margin)
-				if (z.posX + z.width <= b.x + 1 && z.posX + z.width >= b.x - 25) {
+				if (z.x + z.width <= b.x + 1 && z.x + z.width >= b.x - 25) {
 
-					if (z.posY >= b.y - 25 && z.posY <= b.y + b.height + 25) {
+					if (z.y >= b.y - 25 && z.y <= b.y + b.height + 25) {
 
 						//if player is to the right of zombie
-						if (player.playerPosX > z.posX) {
+						if (player.x > z.x) {
 
 
-							if (player.playerPosY <= (b.height/2) + b.y) {
+							if (player.y <= (b.height/2) + b.y) {
 								z.speedX = 0;
 								z.speedY = -0.5;
 							}
 
-							if (player.playerPosY > (b.height/2) + b.y) {
+							if (player.y > (b.height/2) + b.y) {
 								z.speedX = 0;
 								z.speedY = 0.5;
 							}
 
-							if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x - 25) {
+							if (player.x + player.width <= b.x + 1 && player.x + player.width >= b.x - 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
 
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
-									if (player.playerPosY <= (b.height/2) + b.y) {
+									if (player.y <= (b.height/2) + b.y) {
 										z.speedX = 0;
 										z.speedY += -0.2;
 									}
-									if (player.playerPosY > (b.height/2) + b.y) {
+									if (player.y > (b.height/2) + b.y) {
 										z.speedX = 0;
 										z.speedY += 0.2;
 									}
-									if (player.playerPosX + player.playerWidth <= b.x + 1 && player.playerPosX + player.playerWidth >= b.x - 25) {
+									if (player.x + player.width <= b.x + 1 && player.x + player.width >= b.x - 25) {
 										z.speedX += -0.2*Math.sin(z.angle);
 										z.speedY += -0.2*Math.cos(z.angle);
 									}
@@ -459,40 +459,40 @@ public class Game {
 				}
 
 				//if zombie is above building (within a 25 pixel margin)
-				if (z.posY + z.height <= b.y +1 && z.posY + z.height >= b.y - 25) {
+				if (z.y + z.height <= b.y +1 && z.y + z.height >= b.y - 25) {
 
-					if (z.posX + z.width >= b.x - 25 && z.posX <= b.x + b.width + 25) {
+					if (z.x + z.width >= b.x - 25 && z.x <= b.x + b.width + 25) {
 
 
 						//if player is below zombie
-						if (player.playerPosY > z.posY) {
+						if (player.y > z.y) {
 
-							if (player.playerPosX <= (b.width/2) + b.x) {
+							if (player.x <= (b.width/2) + b.x) {
 								z.speedX = -0.5;
 								z.speedY = 0;
 							}
 
-							if (player.playerPosX > (b.width/2) + b.x) {
+							if (player.x > (b.width/2) + b.x) {
 								z.speedX = 0.5;
 								z.speedY = 0;
 							}
 
-							if (player.playerPosY + player.playerHeight <= b.y +1 && player.playerPosY + player.playerHeight >= b.y - 25) {
+							if (player.y + player.height <= b.y +1 && player.y + player.height >= b.y - 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
 
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
-									if (player.playerPosX <= (b.width/2) + b.x) {
+									if (player.x <= (b.width/2) + b.x) {
 										z.speedX += -0.2;
 										z.speedY = 0;
 									}
-									if (player.playerPosX > (b.width/2) + b.x) {
+									if (player.x > (b.width/2) + b.x) {
 										z.speedX += 0.2;
 										z.speedY = 0;
 									}
-									if (player.playerPosY + player.playerHeight <= b.y +1 && player.playerPosY + player.playerHeight >= b.y - 25) {
+									if (player.y + player.height <= b.y +1 && player.y + player.height >= b.y - 25) {
 										z.speedX += -0.2*Math.sin(z.angle);
 										z.speedY += -0.2*Math.cos(z.angle);
 									}
@@ -503,38 +503,38 @@ public class Game {
 				}
 
 				//if zombie is below building (within a 25 pixel margin)
-				if (z.posY >= b.y + b.height -1 && z.posY <= b.y + b.height + 25) {
+				if (z.y >= b.y + b.height -1 && z.y <= b.y + b.height + 25) {
 
-					if (z.posX + z.width >= b.x - 25 && z.posX <= b.x+ b.width + 25) {
+					if (z.x + z.width >= b.x - 25 && z.x <= b.x+ b.width + 25) {
 
 						//if player is above zombie
-						if (player.playerPosY < z.posY) {
+						if (player.y < z.y) {
 
-							if (player.playerPosX <= (b.width/2) + b.x) {
+							if (player.x <= (b.width/2) + b.x) {
 								z.speedX = -0.5;
 								z.speedY = 0;
 							}
 
-							if (player.playerPosX > (b.width/2) + b.x) {
+							if (player.x > (b.width/2) + b.x) {
 								z.speedX = 0.5;
 								z.speedY = 0;
 							}
 
-							if (player.playerPosY >= b.y + b.height -1 && player.playerPosY <= b.y + b.height + 25) {
+							if (player.y >= b.y + b.height -1 && player.y <= b.y + b.height + 25) {
 								z.speedX = -0.5*Math.sin(z.angle);
 								z.speedY = -0.5*Math.cos(z.angle);
 							}
 							for (int j = 0; j < round; j++) {
 								if (round > 1 && roundOver) {
-									if (player.playerPosX <= (b.width/2) + b.x) {
+									if (player.x <= (b.width/2) + b.x) {
 										z.speedX += -0.2;
 										z.speedY = 0;
 									}
-									if (player.playerPosX > (b.width/2) + b.x) {
+									if (player.x > (b.width/2) + b.x) {
 										z.speedX += 0.2;
 										z.speedY = 0;
 									}
-									if (player.playerPosY >= b.y + b.height -1 && player.playerPosY <= b.y + b.height + 25) {
+									if (player.y >= b.y + b.height -1 && player.y <= b.y + b.height + 25) {
 										z.speedX += -0.2*Math.sin(z.angle);
 										z.speedY += -0.2*Math.cos(z.angle);
 									}
@@ -545,8 +545,8 @@ public class Game {
 				}
 			}
 
-			z.posX += z.speedX;
-			z.posY += z.speedY;
+			z.x += z.speedX;
+			z.y += z.speedY;
 		}
 	}
 
@@ -559,17 +559,17 @@ public class Game {
 				Zombie z = zombieList.get(j);
 
 				//if bullet goes off screen
-				if (b.posX < 0 || b.posX >= panW || b.posY < 0 || b.posY >= panH) {
+				if (b.x < 0 || b.x >= panW || b.y < 0 || b.y >= panH) {
 					bulletList.remove(i);
 					return;
 				}
 
 				//if bullet hits a building
-				for (int k = 0; k < buildingList.size(); k++) {
-					Obstacle build = buildingList.get(k);
-					if(b.posX >= build.x && b.posX <= build.x+build.width) {
+				for (int k = 0; k < obstacleList.size(); k++) {
+					Obstacle build = obstacleList.get(k);
+					if(b.x >= build.x && b.x <= build.x+build.width) {
 
-						if (b.posY >= build.y && b.posY <= build.y+build.height) {
+						if (b.y >= build.y && b.y <= build.y+build.height) {
 							bulletList.remove(i);
 							return;
 						}
@@ -578,28 +578,28 @@ public class Game {
 
 
 				//if bullet hits the border
-				if (b.posX <= border.x) { //left side
+				if (b.x <= border.x) { //left side
 					bulletList.remove(i);
 					return;
 				}
-				if (b.posX + b.width >= border.x + border.width) { //right side
+				if (b.x + b.width >= border.x + border.width) { //right side
 					bulletList.remove(i);
 					return;
 				}
-				if (b.posY <= border.y) { //top side
+				if (b.y <= border.y) { //top side
 					bulletList.remove(i);
 					return;
 				}
-				if (b.posY + b.height >= border.y + border.height) { //bottom side
+				if (b.y + b.height >= border.y + border.height) { //bottom side
 					bulletList.remove(i);
 					return;
 				}
 
 
 				//if bullet hits a zombie
-				if (b.posX >= z.posX && b.posX <= z.posX+z.width) {
+				if (b.x >= z.x && b.x <= z.x+z.width) {
 
-					if (b.posY >= z.posY && b.posY <= z.posY+z.height) {
+					if (b.y >= z.y && b.y <= z.y+z.height) {
 
 						z.health -= b.damage;
 						bulletList.remove(i);
@@ -614,8 +614,8 @@ public class Game {
 				}
 			}
 
-			b.posX += b.speedX;
-			b.posY += b.speedY;
+			b.x += b.speedX;
+			b.y += b.speedY;
 		}
 
 	}
@@ -632,8 +632,8 @@ public class Game {
 	void createBullets(int x, int y) {
 
 		//where bullet is getting shot out from
-		double deltaX = Math.abs((player.playerPosX + (player.playerWidth/2)-4)-x);
-		double deltaY = Math.abs((player.playerPosY + (player.playerHeight/2)-4)-y);
+		double deltaX = Math.abs((player.x + (player.width/2)-4)-x);
+		double deltaY = Math.abs((player.y + (player.height/2)-4)-y);
 		double angle = Math.atan2(deltaY, deltaX);
 
 		double bulletX, bulletY;
@@ -656,16 +656,16 @@ public class Game {
 //		if (y >= player.playerPosY + (player.playerHeight/2)) bulletY = 50*Math.sin(angle);
 //		else bulletY = -50*Math.sin(angle);
 //
-		Bullet b = new Bullet(player.playerPosX + (player.playerWidth/2)-4,player.playerPosY + (player.playerHeight/2)-4,0,0);
+		Bullet b = new Bullet(player.x + (player.width/2)-4,player.y + (player.height/2)-4,0,0);
 //		Bullet b = new Bullet(player.playerPosX+(player.playerWidth/2)+bulletX,player.playerPosY+(player.playerHeight/2)+bulletY,0,0);
 //
 //		angle = Math.atan2(Math.abs(player.playerPosY+(player.playerHeight/2)+bulletY-y), Math.abs(player.playerPosX+(player.playerWidth/2)+bulletX-x));
 
 		//bullet velocity
-		if (x > player.playerPosX) b.speedX = (double)(5*Math.cos(angle));
-		if (x < player.playerPosX) b.speedX = (double)(-5*Math.cos(angle));
-		if (y > player.playerPosY) b.speedY = (double)(5*Math.sin(angle));
-		if (y < player.playerPosY) b.speedY = (double)(-5*Math.sin(angle));
+		if (x > player.x) b.speedX = (double)(5*Math.cos(angle));
+		if (x < player.x) b.speedX = (double)(-5*Math.cos(angle));
+		if (y > player.y) b.speedY = (double)(5*Math.sin(angle));
+		if (y < player.y) b.speedY = (double)(-5*Math.sin(angle));
 
 
 		now = System.currentTimeMillis();		
@@ -682,7 +682,7 @@ public class Game {
 			Zombie z = zombieList.get(i);
 			now = System.currentTimeMillis();
 
-			if (z.posX >= player.playerPosX-1 && z.posX <= player.playerPosX+player.playerWidth +1 && z.posY >= player.playerPosY-1 && z.posY <= player.playerPosY + player.playerHeight+1) {
+			if (z.x >= player.x-1 && z.x <= player.x+player.width +1 && z.y >= player.y-1 && z.y <= player.y + player.height+1) {
 
 				if (now - prevHit >= 2000) { //player can only lose health ever 2 seconds
 					player.health -= z.damage;
@@ -836,7 +836,7 @@ public class Game {
 				g2.setColor(bulletClr);
 				for (int i = 0; i < bulletList.size(); i++) {
 					Bullet b = bulletList.get(i);
-					g2.fill(new Ellipse2D.Double(b.posX, b.posY, b.width, b.height));
+					g2.fill(new Ellipse2D.Double(b.x, b.y, b.width, b.height));
 				}
 
 				//draw player
@@ -850,7 +850,7 @@ public class Game {
 				}
 
 				//draw buildings
-				for (Obstacle b : buildingList) {
+				for (Obstacle b : obstacleList) {
 
 					g2.setColor(b.shadowColour);
 					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
@@ -858,7 +858,7 @@ public class Game {
 
 				}
 
-				for (Obstacle b : buildingList) {
+				for (Obstacle b : obstacleList) {
 
 					g2.setColor(b.colour);
 					//g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
@@ -870,7 +870,7 @@ public class Game {
 				g2.setColor(Color.white);
 				for (int i = 0; i < zombieList.size(); i++) {
 					Zombie z = zombieList.get(i);	
-					g2.fill(new Rectangle2D.Double(z.posX + (z.width/2)-(12), z.posY - 15, (int)(30*(z.health/z.fullHealth)),5));
+					g2.fill(new Rectangle2D.Double(z.x + (z.width/2)-(12), z.y - 15, (int)(30*(z.health/z.fullHealth)),5));
 				}
 
 				//score and round displays
@@ -897,17 +897,18 @@ public class Game {
 
 					//draw player hitbox
 					g2.setStroke(new BasicStroke(4));
-					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
-					g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
-					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
-					g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
-
+//					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
+//					g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+//					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
+//					g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
+					g2.drawRect((int)player.x, (int)player.y, (int)player.width, (int)player.height);
 					//draw zombie hitbox
 					for (Zombie z : zombieList) {
-						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
-						g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
-						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
-						g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
+//						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
+//						g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
+//						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
+//						g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
+						g2.drawRect((int)z.x,(int)z.y,(int)z.width,(int)z.height);
 					}
 				}
 
