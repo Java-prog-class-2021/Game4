@@ -1,4 +1,5 @@
 package zombiegame;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -20,7 +21,6 @@ public class Zombie {
 	double damage = 8;
 	double fullHealth = 50;
 	double health = fullHealth;
-
 
 	Image imgZombie;
 
