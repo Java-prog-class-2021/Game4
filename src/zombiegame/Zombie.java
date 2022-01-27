@@ -1,18 +1,19 @@
 package zombiegame;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.net.URL;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import java.awt.Image;
+import java.awt.RenderingHints;
 
 public class Zombie {
 
 	int width = 25;
 	int height = 25;
-	double posX;
-	double posY;
+	double x;
+	double y;
 	double speedX;
 	double speedY;
 	double angle;
@@ -20,9 +21,9 @@ public class Zombie {
 	double fullHealth = 50;
 	double health = fullHealth;
 
-	
+
 	Image imgZombie;
-	
+
 	Zombie() {
 		imgZombie = loadImage("zombie1.png");
 
@@ -40,8 +41,13 @@ public class Zombie {
 	}
 	public void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
-		if (imgZombie == null) return;
-		g.drawImage(imgZombie, (int)posX-12, (int)posY-7, null);
-		
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
+		if (imgZombie == null) {
+			g2.setColor(Color.green);
+			g2.fillRect((int)x, (int)y, (int)width, (int)height);
+			return;
+		}
+		g2.drawImage(imgZombie, (int)x-12, (int)y-7, null);
+
 	}
 }
