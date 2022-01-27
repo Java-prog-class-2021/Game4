@@ -1,33 +1,31 @@
 package zombiegame;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.net.URL;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import zombiegame.Game.GamePanel;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
-import java.io.InputStream;
 public class Player{
 	
-	int playerWidth =34;
-	int playerHeight = 34;
-	double playerPosX;
-	double playerPosY;
-	double playerSpeedX;
-	double playerSpeedY;
+	int width = 34;
+	int height = 34;
+	double x;
+	double y;
+	double speedX;
+	double speedY;
 	double health = 50;
 	
 	Image imgPlayer1;
 	
-	Player(double playerPosX, double playerPosY, double playerSpeedX, double playerSpeedY) {
-		this.playerPosX = playerPosX;
-		this.playerPosY = playerPosY;
-		this.playerSpeedX = playerSpeedX;
-		this.playerSpeedY = playerSpeedY;
+	Player(double x, double y, double speedX, double speedY) {
+		this.x = x;
+		this.y = y;
+		this.speedX = speedX;
+		this.speedY = speedY;
 		imgPlayer1 = loadImage("pisotalposeOG_center.png");
 		
 	}
@@ -50,7 +48,7 @@ public class Player{
 	public void rotation(double rotAngle) {
         //add to movement in game
 
-        transform = AffineTransform.getTranslateInstance(playerPosX, playerPosY);
+        transform = AffineTransform.getTranslateInstance(x, y);
         transform.rotate(rotAngle,imgPlayer1.getWidth(null)/2-35,imgPlayer1.getHeight(null)/2-35);
 
     }
@@ -60,10 +58,11 @@ public class Player{
         Graphics2D g2 = (Graphics2D)g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
 
-        if (imgPlayer1 == null) return;
-
-        //    int player1W = imgPlayer1.getWidth(null);
-        //    int player1H = imgPlayer1.getHeight(null);
+        if (imgPlayer1 == null) {
+        	g2.setColor(Color.yellow);
+        	g2.fillRect((int)x, (int)y, (int)width, (int)height);
+        	return;
+        }
 
         g2.setTransform(transform);
         g2.drawImage(imgPlayer1, (int)-35, (int)-35, null);
