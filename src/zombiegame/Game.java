@@ -97,7 +97,7 @@ public class Game {
 	}
 
 	Game() {
-
+		
 		window = new JFrame("Wastelander");
 		panel = new GamePanel();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -111,9 +111,7 @@ public class Game {
 		window.pack();
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
-
 	}
-
 
 	void setup() {
 
@@ -132,9 +130,8 @@ public class Game {
 		//set ground tiles
 
 		for (int i = 0; i < GRID; i++) {
-
+			
 			for (int j = 0; j < GRID; j++) {
-
 				if (Math.random() > 0.3) board[i][j] = 1;
 				else board[i][j] = 2;
 
@@ -194,7 +191,6 @@ public class Game {
 							z.y = (int)(Math.random()*border.height)+border.y;
 						}
 					}
-
 				}
 				//prevents zombies from spawning in buildings
 				for (Obstacle b: obstacleList) {
@@ -215,7 +211,6 @@ public class Game {
 				}
 				zombieList.add(z);
 			}
-
 		}
 	}
 
@@ -258,7 +253,6 @@ public class Game {
 			player.speedX = 0;
 		}
 
-
 		//COLLISION
 		//against border
 		if (player.x <= border.x && keys[LEFT]) { //left of border
@@ -277,13 +271,12 @@ public class Game {
 		//against buildings
 		for (Obstacle b : obstacleList) {
 
-
 			//bottom of building
 			if (keys[UP]) {
 				if (player.x <= b.x+b.width && player.x+player.width >= b.x) {
-
+					
 					if (player.y <= b.y + b.height + 1 && player.y >= b.y + b.height -1) {
-
+						
 						player.speedY = 0;
 					}
 				}
@@ -294,13 +287,12 @@ public class Game {
 				if (player.x <= b.x+b.width && player.x+player.width >= b.x) {
 
 					if (player.y + player.height <= b.y + 1 && player.y + player.height >= b.y-1) {
-
+						
 						player.speedY = 0;
 					}
 				}
 			}
-
-
+			
 			//left of building
 			if (keys[RIGHT]) {
 				if (player.y <= b.y+b.height&& player.y+player.height >= b.y) {
@@ -344,7 +336,7 @@ public class Game {
 
 		border.x -= player.speedX;
 		border.y -= player.speedY;
-	}
+		}
 
 	void moveZombies() {
 
@@ -367,7 +359,6 @@ public class Game {
 
 			//pathfinding around buildings
 			for (Obstacle b : obstacleList) {
-
 
 				//if zombie is to the right of building (within a 25 pixel margin)
 
@@ -544,7 +535,6 @@ public class Game {
 					}
 				}
 			}
-
 			z.x += z.speedX;
 			z.y += z.speedY;
 		}
@@ -575,8 +565,7 @@ public class Game {
 						}
 					}
 				}
-
-
+				
 				//if bullet hits the border
 				if (b.x <= border.x) { //left side
 					bulletList.remove(i);
@@ -595,7 +584,6 @@ public class Game {
 					return;
 				}
 
-
 				//if bullet hits a zombie
 				if (b.x >= z.x && b.x <= z.x+z.width) {
 
@@ -613,11 +601,9 @@ public class Game {
 					}
 				}
 			}
-
 			b.x += b.speedX;
 			b.y += b.speedY;
 		}
-
 	}
 
 	void gameStatus() {
@@ -636,37 +622,14 @@ public class Game {
 		double deltaY = Math.abs((player.y + (player.height/2)-4)-y);
 		double angle = Math.atan2(deltaY, deltaX);
 
-		double bulletX, bulletY;
-
-
-		//CAST rule for angle adjustment (angle must be adjusted since gun is not centered)
-
-//		if (x > panW/2 && y < panH/2) angle -= 0.1;
-//		if (x < panW/2 && y < panH/2) angle += 0.15;
-//		if (x < panW/2 && y > panH/2) angle -= 0.2;
-//		if (x > panW/2 && y > panH/2) angle += 0.15;
-
-		//calculate x
-
-//		if (x >= player.playerPosX + (player.playerWidth/2)) bulletX = 50*Math.cos(angle);
-//		else bulletX = -50*Math.cos(angle);
-//
-//		//calculate y
-//
-//		if (y >= player.playerPosY + (player.playerHeight/2)) bulletY = 50*Math.sin(angle);
-//		else bulletY = -50*Math.sin(angle);
-//
+		//bullet angle 
 		Bullet b = new Bullet(player.x + (player.width/2)-4,player.y + (player.height/2)-4,0,0);
-//		Bullet b = new Bullet(player.playerPosX+(player.playerWidth/2)+bulletX,player.playerPosY+(player.playerHeight/2)+bulletY,0,0);
-//
-//		angle = Math.atan2(Math.abs(player.playerPosY+(player.playerHeight/2)+bulletY-y), Math.abs(player.playerPosX+(player.playerWidth/2)+bulletX-x));
 
 		//bullet velocity
 		if (x > player.x) b.speedX = (double)(5*Math.cos(angle));
 		if (x < player.x) b.speedX = (double)(-5*Math.cos(angle));
 		if (y > player.y) b.speedY = (double)(5*Math.sin(angle));
 		if (y < player.y) b.speedY = (double)(-5*Math.sin(angle));
-
 
 		now = System.currentTimeMillis();		
 		//bullet cooldown of 300 ms
@@ -738,7 +701,6 @@ public class Game {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
 
-
 			//menu
 			if (!gameIsRunning) {
 				g2.setColor(Color.black);
@@ -759,7 +721,7 @@ public class Game {
 				}
 				g2.drawString("Enter the WARZONE", 275, 250);
 
-
+				//"how to play" font 
 				g2.setFont(submenuFont);
 				if (mouseX >= 285 && mouseX <= 285+510 && mouseY >= 470 && mouseY <= 470 + 40) {
 					g2.setColor(Color.yellow);
@@ -769,7 +731,8 @@ public class Game {
 				}
 				g2.drawString("How to Play", 290, 500);
 			}
-
+			
+			//submenu (how to play screen)
 			if (submenuIsRunning) {
 				g2.setColor(Color.black);
 				g2.fillRect(0, 0, panW, panH);
@@ -799,7 +762,7 @@ public class Game {
 				else {
 					g2.setColor(Color.white);
 				}
-				g2.drawString("RETURN TO MAIN MENU", 250, 550);
+				g2.drawString("RETURN TO MAIN MENU", 250, 550); 
 			}
 
 			if (gameIsRunning) {
@@ -830,7 +793,6 @@ public class Game {
 				g2.setStroke(new BasicStroke(8));
 				g2.drawRect((int)border.x, (int)border.y, (int)border.width, (int)border.height);
 
-
 				//draw bullets
 				g2.setStroke(new BasicStroke(1));
 				g2.setColor(bulletClr);
@@ -841,7 +803,6 @@ public class Game {
 
 				//draw player
 				player.draw(g2);	
-
 
 				//draw zombies
 				for (int i = 0; i < zombieList.size(); i++) {
@@ -854,16 +815,12 @@ public class Game {
 
 					g2.setColor(b.shadowColour);
 					g2.fill(new Rectangle2D.Double(b.x, b.y, b.width+30, b.height+30));
-					//b.draw(g2);
-
 				}
-
+				
 				for (Obstacle b : obstacleList) {
 
 					g2.setColor(b.colour);
-					//g2.fill(new Rectangle2D.Double(b.x, b.y, b.width, b.height));
 					b.draw(g2);
-
 				}
 
 				//draw zombie health bars
@@ -897,17 +854,10 @@ public class Game {
 
 					//draw player hitbox
 					g2.setStroke(new BasicStroke(4));
-//					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY);
-//					g2.drawLine((int)player.playerPosX, (int)player.playerPosY+player.playerHeight, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
-//					g2.drawLine((int)player.playerPosX, (int)player.playerPosY, (int)player.playerPosX, (int)player.playerPosY+player.playerHeight);
-//					g2.drawLine((int)player.playerPosX+player.playerWidth, (int)player.playerPosY, (int)player.playerPosX+player.playerWidth, (int)player.playerPosY+player.playerHeight);
 					g2.drawRect((int)player.x, (int)player.y, (int)player.width, (int)player.height);
+					
 					//draw zombie hitbox
 					for (Zombie z : zombieList) {
-//						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX+z.width, (int)z.posY);
-//						g2.drawLine((int)z.posX, (int)z.posY+z.height, (int)z.posX+z.width, (int)z.posY+z.height);
-//						g2.drawLine((int)z.posX, (int)z.posY, (int)z.posX, (int)z.posY+z.height);
-//						g2.drawLine((int)z.posX+z.width, (int)z.posY, (int)z.posX+z.width, (int)z.posY+z.height);
 						g2.drawRect((int)z.x,(int)z.y,(int)z.width,(int)z.height);
 					}
 				}
@@ -919,7 +869,7 @@ public class Game {
 					g2.setFont(gameoverFont);
 					g2.setColor(Color.white);
 					g2.drawString("GAME OVER", 280, panH/2 - 20);
-
+					
 					g2.setFont(returnFont);
 
 					if (mouseX >= 300 && mouseX <= 300+205 && mouseY >= 290 && mouseY <= 290 + 30) {
@@ -928,7 +878,6 @@ public class Game {
 					else {
 						g2.setColor(Color.white);
 					}
-
 					g2.drawString("Return to Menu", 310, 315);
 
 					SLEEP = 32;
@@ -1036,7 +985,7 @@ public class Game {
 					}
 				}
 			}
-
+			//skip rounds by pressing g
 			if (e.getKeyChar() == 'g') {
 				zombieList.clear();
 			}
@@ -1070,10 +1019,6 @@ public class Game {
 				 * something with angle calculation was off, so these two if statements are here
 				 * to correct the angle
 				 */
-//				if (angle == 0 && mouseY < panH/2) {
-//					angle = Math.PI;
-//				}
-//
 				if (angle == Math.PI/2 && mouseY < panH/2) {
 					angle = 3*Math.PI/2;
 				}
@@ -1092,8 +1037,6 @@ public class Game {
 					if (e.getY() < panH/2) {
 						angle = 2*Math.PI - angle;
 					}
-
-
 				}
 				if (e.getX() < panW/2) {
 
@@ -1105,7 +1048,7 @@ public class Game {
 						angle = Math.PI + angle;
 					}
 				}
-
+				
 				angle += Math.PI/2;
 				
 				player.rotation(angle);
@@ -1129,7 +1072,6 @@ public class Game {
 					spawnZombies();
 					checkHealth();
 					gameStatus();
-
 				}	
 			}
 		}
@@ -1145,5 +1087,4 @@ public class Game {
 			}
 		}
 	};
-
 }
