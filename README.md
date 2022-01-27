@@ -1,7 +1,9 @@
 # Game4
 
 ICS4U1 Final Project
+
 Top-Down Shooter Game 
+
 Involves usage of objects, graphics, movement, trigonometry, etc. 
 
 By: Josh, Henry, Hermela, & Widaad   
