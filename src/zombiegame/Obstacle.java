@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.net.URL;
 
@@ -58,9 +57,6 @@ public class Obstacle {
 			g2.fill(new Rectangle2D.Double(x, y, width, height));
 			return;
 	        }
-	        
-	       int imgH = obstImage.getHeight(null);
-	       int imgW = obstImage.getWidth(null);
 
 	        g.drawImage(obstImage, (int)x,(int)y,(int)width, (int)height, null);
 	        
