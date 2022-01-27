@@ -10,5 +10,4 @@ public class Border {
 	Border() {
 		
 	}
-	
 }
