@@ -7,7 +7,6 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.net.URL;
-
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
@@ -32,8 +31,7 @@ public class Obstacle {
 		this.obstImage = loadImage(img);
 
 	}
-
-
+	
 	Image loadImage(String filename) {
 
 		Image image = null;
@@ -59,10 +57,6 @@ public class Obstacle {
 	        }
 
 	        g.drawImage(obstImage, (int)x,(int)y,(int)width, (int)height, null);
-	        
-
-	    }
-	  
-	
-
+	          
+	  }
 }
