@@ -27,13 +27,14 @@ public class Player{
 		this.speedX = speedX;
 		this.speedY = speedY;
 		imgPlayer1 = loadImage("pisotalposeOG_center.png");
+		rotation(0);
 		
 	}
+	
 	Image loadImage(String filename) {
 		
 		Image image = null;
 		URL imageURL = this.getClass().getResource("/" + filename);
-		//	InputStream inputStr = GamePanel.class.getClassLoader().getResourceAsStream(filename);
 		if (imageURL != null) {
 			ImageIcon icon = new ImageIcon(imageURL);
 			image = icon.getImage();
@@ -53,7 +54,6 @@ public class Player{
 
     }
 
-
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D)g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); //antialiasing
@@ -63,7 +63,6 @@ public class Player{
         	g2.fillRect((int)x, (int)y, (int)width, (int)height);
         	return;
         }
-
         g2.setTransform(transform);
         g2.drawImage(imgPlayer1, (int)-35, (int)-35, null);
         g2.setTransform(new AffineTransform());
